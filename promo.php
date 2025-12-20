@@ -1245,7 +1245,6 @@ $current_date = date('Y-m-d H:i:s');
     <section class="promo-hero">
         <div class="promo-hero-content">
             <div class="promo-badge">
-                <i class="fas fa-gift"></i> PROMO SPESIAL
             </div>
             <h1>Penawaran Terbaik untuk Industri Anda</h1>
             <p>Dapatkan diskon eksklusif, bundling menarik, dan penawaran spesial untuk produk-produk industrial berkualitas dari Megatek</p>
