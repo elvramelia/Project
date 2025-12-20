@@ -735,8 +735,7 @@ try {
     <div class="main-menu">
         <div class="menu-container">
             <a href="beranda.php" class="menu-category <?php echo basename($_SERVER['PHP_SELF']) == 'produk.php' ? 'active' : ''; ?>">
-                <span>Beranda</span>
-                kjghjghj
+                <span>okokokok</span>
             </a>
             <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
             <a href="produk.php" class="menu-category">Produk</a>
