@@ -854,102 +854,87 @@
     </main>
 
     <!-- Modal Tambah/Edit Produk -->
-   <!-- Modal Tambah/Edit Produk -->
-<div class="modal" id="productModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title" id="modalTitle">Tambah Produk Baru</h3>
-            <button class="close-modal" id="closeModal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="productForm">
-                <div class="form-group">
-                    <label for="productName" class="form-label">Nama Produk</label>
-                    <input type="text" id="productName" class="form-control" placeholder="Contoh: Sparepart Pro X200" required>
-                </div>
-                
-                <div class="form-row">
+ <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Produk Baru</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
                     <div class="form-group">
-                        <label for="productCategory" class="form-label">Kategori</label>
-                        <select id="productCategory" class="form-select" required>
-                            <option value="">Pilih Kategori</option>
-                            <option value="Sparepart">Sparepart</option>
-                            <option value="FBR Burner">FBR Burner</option>
-                            <option value="Boiler">Boiler</option>
-                            <option value="Valve & Instrumentation">Valve & Instrumentation</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="productPrice" class="form-label">Harga (Rp)</label>
-                        <input type="number" id="productPrice" class="form-control" placeholder="Contoh: 12500000" required>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="productStock" class="form-label">Stok</label>
-                        <input type="number" id="productStock" class="form-control" placeholder="Contoh: 15" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="productStatus" class="form-label">Status</label>
-                        <select id="productStatus" class="form-select" required>
-                            <option value="active">Aktif</option>
-                            <option value="inactive">Tidak Aktif</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Bagian yang diubah: Upload Gambar -->
-                <div class="form-group">
-                    <label class="form-label">Gambar Produk</label>
-                    
-                    <!-- Preview Gambar -->
-                    <div id="imagePreviewContainer" style="margin-bottom: 15px; display: none;">
-                        <img id="imagePreview" src="" alt="Preview Gambar" style="max-width: 200px; max-height: 150px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                        <label for="productName" class="form-label">Nama Produk</label>
+                        <input type="text" id="productName" class="form-control" placeholder="Contoh: Spareport Pro X200" required>
                     </div>
                     
-                    <!-- Pilihan Upload: File atau URL -->
-                    <div style="margin-bottom: 10px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Pilih metode:</label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <button type="button" id="uploadFileBtn" class="btn btn-outline" style="padding: 8px 15px;">
-                                <i class="fas fa-upload"></i> Upload File
-                            </button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productCategory" class="form-label">Kategori</label>
+                            <select id="productCategory" class="form-select" required>
+                                <option value="">Pilih Kategori</option>
+                                <option value="Spareport">Spareport</option>
+                                <option value="FBR Burner">FBR Burner</option>
+                                <option value="Boiler">Boiler</option>
+                                <option value="Valve & Instrumentation">Valve & Instrumentation</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice" class="form-label">Harga (Rp)</label>
+                            <input type="number" id="productPrice" class="form-control" placeholder="Contoh: 12500000" required>
                         </div>
                     </div>
                     
-                    <!-- Input File (hidden) -->
-                    <input type="file" id="productImageFile" accept="image/*" style="display: none;">
-                    
-                    <!-- Input URL -->
-                    <div id="urlInputContainer" style="display: none;">
-                        <input type="text" id="productImageUrl" class="form-control" placeholder="https://example.com/image.jpg">
-                        <small style="color: #757575; font-size: 13px;">Kosongkan untuk menggunakan gambar default</small>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productStock" class="form-label">Stok</label>
+                            <input type="number" id="productStock" class="form-control" placeholder="Contoh: 15" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productStatus" class="form-label">Status</label>
+                            <select id="productStatus" class="form-select" required>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Tidak Aktif</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <!-- Info File yang dipilih -->
-                    <div id="fileInfo" style="display: none; margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 6px;">
-                        <span id="fileName"></span>
-                        <button type="button" id="removeFileBtn" style="margin-left: 10px; color: #d32f2f; background: none; border: none; cursor: pointer;">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="form-group">
+                        <label for="productImage" class="form-label">Gambar Produk (URL)</label>
+                        <input type="text" id="productImage" class="form-control" placeholder="https://example.com/image.jpg">
+                        <small style="color: var(--gray); font-size: 13px;">Kosongkan untuk menggunakan gambar default</small>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="productDescription" class="form-label">Deskripsi Produk</label>
-                    <textarea id="productDescription" class="form-control" rows="4" placeholder="Deskripsi lengkap produk..."></textarea>
-                </div>
-                
-                <input type="hidden" id="productId">
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-outline" id="cancelBtn">Batal</button>
-            <button class="btn btn-primary" id="saveProductBtn">Simpan Produk</button>
+                    
+                    <div class="form-group">
+                        <label for="productDescription" class="form-label">Deskripsi Produk</label>
+                        <textarea id="productDescription" class="form-control" rows="4" placeholder="Deskripsi lengkap produk..."></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="productId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Batal</button>
+                <button class="btn btn-primary" id="saveProductBtn">Simpan Produk</button>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Konfirmasi Hapus</h3>
+                <button class="close-modal" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteBtn">Batal</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Hapus Produk</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Data produk contoh
