@@ -934,7 +934,7 @@ try {
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="gambar/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
+                    <img src="gambar/LOGO.png" alt="Megatek Logo" class="footer-logo">
                     <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
