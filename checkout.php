@@ -897,24 +897,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="top-bar-content">
-            <div class="top-bar-links">
-                <a href="aboutus.php">Tentang Megatek</a>
-                <a href="seller_center.php">Pusat Edukasi Seller</a>
-                <a href="promo.php">Promo</a>
-                <a href="support.php">Megatek Care</a>
-            </div>
-            <a href="#" class="app-promo">
-                <i class="fas fa-mobile-alt"></i>
-                <span>Gratis Ongkir + Banyak Promo belanja di aplikasi ></span>
-            </a>
-        </div>
-    </div>
-
-    <!-- Main Navbar -->
+<!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
         <a class="navbar-brand mx-2" href="index.php">
             <img src="gambar/LOGO.png" alt="Megatek Logo">
@@ -946,27 +929,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 <?php endif; ?>
             </div>
-            
-            <a href="seller_center.php" class="nav-icon">
-                <i class="fas fa-store"></i>
-                <span>Mulai Berjualan</span>
-            </a>
         </div>
     </nav>
 
     <!-- Main Menu Horizontal -->
     <div class="main-menu">
         <div class="menu-container">
-            <a href="produk.php" class="menu-category">
-                <span>Semua Kategori</span>
-                <i class="fas fa-chevron-down"></i>
+            <a href="beranda.php" class="menu-category <?php echo basename($_SERVER['PHP_SELF']) == 'produk.php' ? 'active' : ''; ?>">
+                <span>Beranda</span>
             </a>
-            <a href="produk.php?category=FBR Burner" class="menu-category">FBR Burner</a>
-            <a href="produk.php?category=Boiler" class="menu-category">Boiler</a>
-            <a href="produk.php?category=Valve & Instrumentation" class="menu-category">Valve & Instrumentation</a>
-            <a href="produk.php?category=Sparepart" class="menu-category">Spare Part</a>
-            <a href="produk.php?featured=1" class="menu-category">Featured</a>
-            <a href="produk.php?popular=1" class="menu-category">Popular</a>
+            <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
+            <a href="produk.php" class="menu-category">Produk</a>
+            <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
             <a href="promo.php" class="menu-category">Promo</a>
         </div>
     </div>

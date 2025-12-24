@@ -210,7 +210,7 @@ $current_date = date('Y-m-d H:i:s');
             padding: 60px 0;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            overflow: hidden; 
         }
 
         .promo-hero:before {
@@ -1196,7 +1196,7 @@ $current_date = date('Y-m-d H:i:s');
         </a>
 
         <div class="search-bar">
-            <input type="text" class="form-control" placeholder="Cari produk promo...">
+            <input type="text" class="form-control" placeholder="Cari produk, kategori, atau brand">
             <button type="button">
                 <i class="fas fa-search"></i>
             </button>

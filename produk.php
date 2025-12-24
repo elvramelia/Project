@@ -1015,9 +1015,7 @@ try {
 <!-- Main Menu Horizontal -->
     <div class="main-menu">
         <div class="menu-container">
-            <a href="beranda.php" class="menu-category <?php echo basename($_SERVER['PHP_SELF']) == 'produk.php' ? 'active' : ''; ?>">
-                <span>Beranda</span>
-            </a>
+           <a href="beranda.php" class="menu-category">Beranda</a>
             <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
             <a href="produk.php" class="menu-category">Produk</a>
             <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>

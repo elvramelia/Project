@@ -623,33 +623,7 @@ require_once '../config/database.php';
         </div>
 
         <!-- CRUD Section -->
-        <section class="crud-section fade-in" style="animation-delay: 0.4s;">
-            <div class="section-header">
-                <h2 class="section-title">Manajemen Produk</h2>
-                <button class="btn btn-primary" id="addProductBtn">
-                    <i class="fas fa-plus"></i> Tambah Produk Baru
-                </button>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nama Produk</th>
-                            <th>Kategori</th>
-                            <th>Harga</th>
-                            <th>Stok</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody">
-                        <!-- Data produk akan dimuat di sini melalui JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
+       
 
         <!-- Footer -->
         <footer class="footer">
@@ -658,81 +632,10 @@ require_once '../config/database.php';
     </main>
 
     <!-- Modal Tambah/Edit Produk -->
-    <div class="modal" id="productModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Tambah Produk Baru</h3>
-                <button class="close-modal" id="closeModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="productForm">
-                    <div class="form-group">
-                        <label for="productName" class="form-label">Nama Produk</label>
-                        <input type="text" id="productName" class="form-control" required>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="productCategory" class="form-label">Kategori</label>
-                            <select id="productCategory" class="form-select" required>
-                                <option value="">Pilih Kategori</option>
-                                <option value="Sparepart">Sporepart</option>
-                                <option value="FBR Burner">FBR Burner</option>
-                                <option value="Boiler">Boiler</option>
-                                <option value="Valve & Instrumentation">Valve & Instrumentation</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="productPrice" class="form-label">Harga (Rp)</label>
-                            <input type="number" id="productPrice" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="productStock" class="form-label">Stok</label>
-                            <input type="number" id="productStock" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="productStatus" class="form-label">Status</label>
-                            <select id="productStatus" class="form-select" required>
-                                <option value="active">Aktif</option>
-                                <option value="inactive">Tidak Aktif</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="productDescription" class="form-label">Deskripsi Produk</label>
-                        <textarea id="productDescription" class="form-control" rows="4"></textarea>
-                    </div>
-                    
-                    <input type="hidden" id="productId">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="cancelBtn">Batal</button>
-                <button class="btn btn-primary" id="saveProductBtn">Simpan Produk</button>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Modal Konfirmasi Hapus -->
-    <div class="modal" id="deleteModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Konfirmasi Hapus</h3>
-                <button class="close-modal" id="closeDeleteModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="cancelDeleteBtn">Batal</button>
-                <button class="btn btn-danger" id="confirmDeleteBtn">Hapus Produk</button>
-            </div>
-        </div>
-    </div>
+    
 
     <script>
         // Data produk contoh
