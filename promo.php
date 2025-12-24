@@ -210,7 +210,7 @@ $current_date = date('Y-m-d H:i:s');
             padding: 60px 0;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            overflow: hidden; 
         }
 
         .promo-hero:before {
