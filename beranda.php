@@ -150,7 +150,7 @@ try {
         }
 
         /* Main Menu Horizontal */
-        .main-menu {
+       .main-menu {
             background-color: white;
             border-bottom: 1px solid #e0e0e0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -163,6 +163,7 @@ try {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
         }
 
         .menu-category {
@@ -172,6 +173,7 @@ try {
             padding: 15px 0;
             font-weight: 500;
             color: var(--dark-gray);
+            text-decoration: none;
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
@@ -227,6 +229,7 @@ try {
             border-top: 1px solid #eee;
             margin: 5px 0;
         }
+
 
         /* Cart Badge */
         .cart-badge {

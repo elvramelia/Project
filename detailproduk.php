@@ -1292,7 +1292,6 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
             <div class="tab-header">
                 <button class="tab-button active" data-tab="description">Deskripsi Produk</button>
                 <button class="tab-button" data-tab="specifications">Spesifikasi Teknis</button>
-                <button class="tab-button" data-tab="reviews">Ulasan (24)</button>
                 <button class="tab-button" data-tab="faq">FAQ</button>
             </div>
             
@@ -1367,82 +1366,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
                     </table>
                 </div>
                 
-                <!-- Reviews Tab -->
-                <div class="tab-pane" id="reviews">
-                    <div class="reviews-summary">
-                        <div class="average-rating">
-                            <div class="rating-score">4.8</div>
-                            <div class="rating-stars">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                            <div class="review-count-large">24 ulasan</div>
-                        </div>
-                        
-                        <div class="rating-bars">
-                            <div class="rating-bar">
-                                <div class="bar-label">5★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 85%;"></div>
-                                </div>
-                                <div class="bar-percentage">85%</div>
-                            </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">4★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 12%;"></div>
-                                </div>
-                                <div class="bar-percentage">12%</div>
-                            </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">3★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 2%;"></div>
-                                </div>
-                                <div class="bar-percentage">2%</div>
-                            </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">2★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 1%;"></div>
-                                </div>
-                                <div class="bar-percentage">1%</div>
-                            </div>
-                            <div class="rating-bar">
-                                <div class="bar-label">1★</div>
-                                <div class="bar-container">
-                                    <div class="bar-fill" style="width: 0%;"></div>
-                                </div>
-                                <div class="bar-percentage">0%</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="reviews-list">
-                        <!-- Sample Review -->
-                        <div class="review-item">
-                            <div class="review-header">
-                                <div class="reviewer">
-                                    <strong>PT. Industri Maju</strong>
-                                    <div class="review-date">15 Desember 2023</div>
-                                </div>
-                                <div class="review-rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
-                            <div class="review-content">
-                                <p>Produk berkualitas tinggi, pengiriman tepat waktu, dan dukungan teknis yang sangat membantu. Sangat direkomendasikan!</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
                 
                 <!-- FAQ Tab -->
                 <div class="tab-pane" id="faq">
