@@ -1196,7 +1196,7 @@ $current_date = date('Y-m-d H:i:s');
         </a>
 
         <div class="search-bar">
-            <input type="text" class="form-control" placeholder="Cari produk promo...">
+            <input type="text" class="form-control" placeholder="Cari produk, kategori, atau brand">
             <button type="button">
                 <i class="fas fa-search"></i>
             </button>
