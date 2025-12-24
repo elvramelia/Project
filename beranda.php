@@ -686,7 +686,7 @@ try {
                         ?>
                     </span>
                 </div>
-                <span>Cart</span>
+                <span>Keranjang</span>
             </a>
             
             <div id="userSection">
@@ -793,7 +793,7 @@ try {
                 <?php if (!empty($featured_products)): ?>
                     <?php foreach ($featured_products as $product): ?>
                         <div class="col-md-3 col-sm-6 mb-4">
-                            <a href="product_detail.php?id=<?php echo $product['id']; ?>" class="featured-card">
+                            <a href="detailproduk.php?id=<?php echo $product['id']; ?>" class="featured-card">
                                 <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                                 <p class="mt-2"><?php echo htmlspecialchars($product['name']); ?></p>
                                 <div class="product-price">
@@ -819,7 +819,7 @@ try {
                 <?php if (!empty($popular_products)): ?>
                     <?php foreach ($popular_products as $product): ?>
                         <div class="col-md-4 col-sm-6 mb-4">
-                            <a href="product_detail.php?id=<?php echo $product['id']; ?>" class="popular-card">
+                            <a href="detailproduk.php?id=<?php echo $product['id']; ?>" class="popular-card">
                                 <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                                 <p><?php echo htmlspecialchars($product['name']); ?></p>
                                 <div class="product-price">

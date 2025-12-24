@@ -854,7 +854,7 @@
     </main>
 
     <!-- Modal Tambah/Edit Produk -->
-    <div class="modal" id="productModal">
+ <div class="modal" id="productModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="modalTitle">Tambah Produk Baru</h3>
