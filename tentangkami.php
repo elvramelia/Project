@@ -917,8 +917,7 @@ require_once 'config/check_login.php';
                     </a>
                 <?php endif; ?>
             </div>
-            
-        </div>
+                    </div>
     </nav>
 
   <!-- Main Menu Horizontal -->
