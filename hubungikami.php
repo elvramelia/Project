@@ -817,7 +817,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="index.php">
+        <a class="navbar-brand mx-2" href="beranda.php">
             <img src="gambar/LOGO.png" alt="Megatek Logo">
         </a>
 
@@ -845,7 +845,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ?>
                     </span>
                 </div>
-                <span>Cart</span>
+                <span>Keranjang</span>
             </a>
             
             <div id="userSection">

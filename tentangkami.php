@@ -847,7 +847,7 @@ require_once 'config/check_login.php';
 <body>
  <!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="index.php">
+        <a class="navbar-brand mx-2" href="beranda.php">
             <img src="gambar/LOGO.png" alt="Megatek Logo">
         </a>
 
@@ -875,7 +875,7 @@ require_once 'config/check_login.php';
                         ?>
                     </span>
                 </div>
-                <span>Cart</span>
+                <span>Keranjang</span>
             </a>
             
             <div id="userSection">
