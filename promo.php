@@ -105,11 +105,27 @@ $current_date = date('Y-m-d H:i:s');
         .navbar-brand img {
             height: 40px;
         }
+        /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background-color: #ff4444;
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
 
         .search-bar {
             flex-grow: 1;
             max-width: 500px;
-            margin: 0 auto;
+            margin: 0 auto
             position: relative;
         }
 
@@ -205,56 +221,23 @@ $current_date = date('Y-m-d H:i:s');
 
         /* Promo Hero Section */
         .promo-hero {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            background-color: var(--primary-blue);
             color: white;
-            padding: 60px 0;
+            padding: 40px 0;
             text-align: center;
-            position: relative;
-            overflow: hidden; 
-        }
-
-        .promo-hero:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" opacity="0.1"><path fill="white" d="M0 0h1200v600H0z"/><circle cx="300" cy="300" r="150" fill="none" stroke="white" stroke-width="2"/><circle cx="900" cy="300" r="150" fill="none" stroke="white" stroke-width="2"/></svg>');
-            background-size: cover;
-        }
-
-        .promo-hero-content {
-            position: relative;
-            z-index: 1;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px;
         }
 
         .promo-hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 15px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
 
         .promo-hero p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
-        }
-
-        .promo-badge {
-            display: inline-block;
-            background-color: var(--accent-orange);
-            color: white;
-            padding: 10px 25px;
-            border-radius: 30px;
-            font-weight: 600;
             font-size: 1.1rem;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
         }
 
         /* Promo Container */
@@ -1202,31 +1185,65 @@ $current_date = date('Y-m-d H:i:s');
             </button>
         </div>
 
-        <div class="nav-icons">
-            <a href="keranjang.php" class="nav-icon">
+       <div class="nav-icons">
+            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
                 <div style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge" id="cartCount">0</span>
+                    <span class="cart-badge" id="cartCount">
+                        <?php 
+                        if (isLoggedIn()) {
+                            $user_id = $_SESSION['user_id'];
+                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+                            echo $cart_count;
+                        } else {
+                            echo '0';
+                        }
+                        ?>
+                    </span>
                 </div>
-                <span>Cart</span>
+                <span>Keranjang</span>
             </a>
             
             <div id="userSection">
                 <?php if (isLoggedIn()): ?>
+                    <!-- User sudah login -->
                     <div class="user-dropdown">
-                        <a href="javascript:void(0);" class="nav-icon">
+                        <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
                             <i class="fas fa-user"></i>
-                            <span>Akun</span>
+                            <span>
+                                <?php 
+                                if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
+                                    echo htmlspecialchars($_SESSION['first_name']);
+                                } else {
+                                    echo 'Akun';
+                                }
+                                ?>
+                            </span>
                         </a>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <span class="dropdown-item-text">
+                                <small>Logged in as:</small><br>
+                                <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
+                            </span>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a>
+                            <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
+                            <a class="dropdown-item" href="wishlist.php"><i class="fas fa-heart me-2"></i>Wishlist</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </div>
                     </div>
                 <?php else: ?>
+                    <!-- User belum login -->
                     <a href="javascript:void(0);" class="nav-icon" id="userLogin">
                         <i class="fas fa-user"></i>
                         <span>Masuk/Daftar</span>
                     </a>
                 <?php endif; ?>
             </div>
-        </div>
     </nav>
 
      <!-- Main Menu Horizontal -->
@@ -1243,11 +1260,9 @@ $current_date = date('Y-m-d H:i:s');
     </div>
     <!-- Promo Hero Section -->
     <section class="promo-hero">
-        <div class="promo-hero-content">
-            <div class="promo-badge">
-            </div>
-            <h1>Penawaran Terbaik untuk Industri Anda</h1>
-            <p>Dapatkan diskon eksklusif, bundling menarik, dan penawaran spesial untuk produk-produk industrial berkualitas dari Megatek</p>
+        <div class="container">
+            <h1>Promo</h1>
+            <p>Kami siap membantu Anda. Hubungi tim kami untuk pertanyaan, dukungan, atau informasi lebih lanjut tentang produk dan layanan kami.</p>
         </div>
     </section>
 
