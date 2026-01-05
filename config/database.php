@@ -20,9 +20,9 @@ if ($conn->connect_error) {
 $conn->set_charset("utf8mb4");
 
 // Function untuk escape string
-function escape($conn, $string) {
-    return $conn->real_escape_string($string);
-}
+//function escape($conn, $string) {
+  //  return $conn->real_escape_string($string);
+//}
 
 // Buat juga koneksi PDO untuk fleksibilitas
 try {

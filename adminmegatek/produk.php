@@ -1,11 +1,15 @@
 <?php
-
-// Tambahkan ini di baris paling atas
+// Konfigurasi Error Reporting (Hanya untuk debugging, matikan saat live)
+// Kita matikan display_errors agar error PHP tidak merusak respons JSON
+ini_set('display_errors', 0); 
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+
 // Mulai session dan koneksi database
 session_start();
-require_once '../config/database.php';
+// Pastikan path ini benar sesuai struktur folder Anda
+require_once '../config/database.php'; 
+
+// --- HELPER FUNCTIONS ---
 
 // Fungsi untuk mendapatkan semua produk
 function getAllProducts($conn) {
@@ -33,13 +37,16 @@ function getProductById($conn, $id) {
 
 // Fungsi untuk tambah/edit produk
 function saveProduct($conn, $data, $file = null) {
-    $id = $data['id'] ?? null;
-    $name = escape($conn, $data['name']);
-    $description = escape($conn, $data['description']);
-    $category = escape($conn, $data['category']);
+    $id = !empty($data['productId']) ? $data['productId'] : null; // Perbaikan pengambilan ID dari form
+    
+    // HAPUS fungsi escape() karena kita menggunakan Prepared Statement (bind_param)
+    // Prepared Statement sudah aman dari SQL Injection.
+    $name = $data['name'];
+    $description = $data['description'];
+    $category = $data['category'];
     $price = floatval($data['price']);
     $stock = intval($data['stock']);
-    $status = escape($conn, $data['status']);
+    $status = $data['status'];
     $featured = isset($data['featured']) ? 1 : 0;
     $popular = isset($data['popular']) ? 1 : 0;
     
@@ -49,7 +56,16 @@ function saveProduct($conn, $data, $file = null) {
     if ($file && isset($file['productImageFile']) && $file['productImageFile']['error'] == 0) {
         $uploadResult = uploadImage($file['productImageFile']);
         if ($uploadResult['success']) {
+            // Jika ada gambar baru dan ini edit, hapus gambar lama (opsional, hati-hati jika gambar default)
+            if ($id && !empty($image_url) && file_exists($image_url)) {
+                 // unlink($image_url); // Uncomment jika ingin menghapus gambar lama
+            }
             $image_url = $uploadResult['filepath'];
+        } else {
+             return [
+                'success' => false,
+                'message' => $uploadResult['message']
+            ];
         }
     }
     
@@ -61,6 +77,7 @@ function saveProduct($conn, $data, $file = null) {
                 popular = ?, updated_at = NOW() 
                 WHERE id = ?";
         $stmt = $conn->prepare($sql);
+        // Perbaiki tipe data bind_param: d untuk double (price), i untuk integer
         $stmt->bind_param("sssdisssii", 
             $name, $description, $category, $price, $stock, 
             $status, $image_url, $featured, $popular, $id
@@ -86,7 +103,7 @@ function saveProduct($conn, $data, $file = null) {
     } else {
         return [
             'success' => false,
-            'message' => 'Gagal menyimpan produk: ' . $conn->error
+            'message' => 'Gagal menyimpan produk: ' . $conn->error // Mengambil error SQL asli
         ];
     }
 }
@@ -118,7 +135,8 @@ function deleteProduct($conn, $id) {
 
 // Fungsi untuk upload gambar
 function uploadImage($file) {
-    $uploadDir = '../Project/gambar/';
+    // Pastikan path folder upload benar dan folder sudah ada/writable
+    $uploadDir = '../Project/gambar/'; 
     
     // Buat folder jika belum ada
     if (!file_exists($uploadDir)) {
@@ -128,16 +146,17 @@ function uploadImage($file) {
     $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     $maxSize = 5 * 1024 * 1024; // 5MB
     
-    // Validasi
+    // Validasi Tipe
     if (!in_array($file['type'], $allowedTypes)) {
-        return ['success' => false, 'message' => 'Format file tidak didukung'];
+        return ['success' => false, 'message' => 'Format file tidak didukung (Hanya JPG, PNG, WEBP)'];
     }
     
+    // Validasi Ukuran
     if ($file['size'] > $maxSize) {
         return ['success' => false, 'message' => 'Ukuran file terlalu besar (maks 5MB)'];
     }
     
-    // Generate nama unik
+    // Generate nama unik agar tidak bentrok
     $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
     $filename = 'product_' . time() . '_' . uniqid() . '.' . $extension;
     $filepath = $uploadDir . $filename;
@@ -151,41 +170,50 @@ function uploadImage($file) {
             'url' => $filepath
         ];
     } else {
-        return ['success' => false, 'message' => 'Gagal mengupload file'];
+        return ['success' => false, 'message' => 'Gagal mengupload file ke server'];
     }
 }
 
-// Fungsi escape string
-//function escape($conn, $string) {
-  //  return $conn->real_escape_string($string);
-//}
-
-// Handle form submission
+// --- HANDLE REQUEST AJAX ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+    // Set header agar browser tahu ini respon JSON
+    header('Content-Type: application/json');
     
-    switch ($action) {
-        case 'save':
-            $result = saveProduct($conn, $_POST, $_FILES);
-            echo json_encode($result);
-            exit;
-            
-        case 'delete':
-            $id = intval($_POST['id']);
-            $result = deleteProduct($conn, $id);
-            echo json_encode($result);
-            exit;
-            
-        case 'upload_image':
-            if (isset($_FILES['image'])) {
-                $result = uploadImage($_FILES['image']);
+    try {
+        $action = $_POST['action'] ?? '';
+        
+        switch ($action) {
+            case 'save':
+                $result = saveProduct($conn, $_POST, $_FILES);
                 echo json_encode($result);
-            }
-            exit;
+                exit;
+                
+            case 'delete':
+                $id = intval($_POST['id']);
+                $result = deleteProduct($conn, $id);
+                echo json_encode($result);
+                exit;
+                
+            case 'upload_image':
+                if (isset($_FILES['image'])) {
+                    $result = uploadImage($_FILES['image']);
+                    echo json_encode($result);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Tidak ada gambar diupload']);
+                }
+                exit;
+        }
+    } catch (Exception $e) {
+        // Tangkap error fatal dan kirim sebagai JSON
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Server Error: ' . $e->getMessage()
+        ]);
+        exit;
     }
 }
 
-// Get all products for display
+// Get all products for display (HTML View)
 $products = getAllProducts($conn);
 ?>
 <!DOCTYPE html>
@@ -316,24 +344,6 @@ $products = getAllProducts($conn);
         .header h1 {
             color: var(--primary);
             font-size: 28px;
-        }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--gray);
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .breadcrumb a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .breadcrumb a:hover {
-            text-decoration: underline;
         }
 
         .user-info {
@@ -480,10 +490,6 @@ $products = getAllProducts($conn);
             font-size: 14px;
         }
 
-        .product-count i {
-            margin-right: 5px;
-        }
-
         /* Products Grid */
         .products-grid {
             display: grid;
@@ -573,21 +579,9 @@ $products = getAllProducts($conn);
             border-radius: 50%;
         }
 
-        .stock-high {
-            background-color: var(--success);
-        }
-
-        .stock-low {
-            background-color: var(--warning);
-        }
-
-        .stock-none {
-            background-color: var(--danger);
-        }
-
-        .stock-text {
-            font-weight: 600;
-        }
+        .stock-high { background-color: var(--success); }
+        .stock-low { background-color: var(--warning); }
+        .stock-none { background-color: var(--danger); }
 
         .status-badge {
             padding: 5px 12px;
@@ -596,15 +590,8 @@ $products = getAllProducts($conn);
             font-weight: 600;
         }
 
-        .status-active {
-            background-color: rgba(39, 174, 96, 0.15);
-            color: var(--success);
-        }
-
-        .status-inactive {
-            background-color: rgba(231, 76, 60, 0.15);
-            color: var(--danger);
-        }
+        .status-active { background-color: rgba(39, 174, 96, 0.15); color: var(--success); }
+        .status-inactive { background-color: rgba(231, 76, 60, 0.15); color: var(--danger); }
 
         .product-actions {
             display: flex;
@@ -628,82 +615,14 @@ $products = getAllProducts($conn);
             transition: all 0.3s;
         }
 
-        .view-btn {
-            background-color: #f8f9fa;
-            color: var(--secondary);
-            border: 1px solid #ddd;
-        }
+        .view-btn { background-color: #f8f9fa; color: var(--secondary); border: 1px solid #ddd; }
+        .view-btn:hover { background-color: #e9ecef; }
 
-        .view-btn:hover {
-            background-color: #e9ecef;
-        }
+        .edit-btn { background-color: var(--primary); color: white; }
+        .edit-btn:hover { background-color: var(--primary-light); }
 
-        .edit-btn {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .edit-btn:hover {
-            background-color: var(--primary-light);
-        }
-
-        .delete-btn {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .delete-btn:hover {
-            background-color: #c0392b;
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 40px;
-            padding-top: 25px;
-            border-top: 1px solid #eee;
-        }
-
-        .page-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--border-radius);
-            border: 1px solid #ddd;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .page-btn:hover {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .page-btn.active {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .page-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .page-btn.disabled:hover {
-            background-color: white;
-            color: inherit;
-            border-color: #ddd;
-        }
+        .delete-btn { background-color: var(--danger); color: white; }
+        .delete-btn:hover { background-color: #c0392b; }
 
         /* Footer */
         .footer {
@@ -751,10 +670,7 @@ $products = getAllProducts($conn);
             align-items: center;
         }
 
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-        }
+        .modal-title { font-size: 20px; font-weight: 600; }
 
         .close-modal {
             background: none;
@@ -765,18 +681,11 @@ $products = getAllProducts($conn);
             line-height: 1;
             transition: all 0.3s;
         }
+        .close-modal:hover { transform: scale(1.1); }
 
-        .close-modal:hover {
-            transform: scale(1.1);
-        }
+        .modal-body { padding: 25px; }
 
-        .modal-body {
-            padding: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form-group { margin-bottom: 20px; }
 
         .form-label {
             display: block;
@@ -786,7 +695,7 @@ $products = getAllProducts($conn);
             font-size: 14px;
         }
 
-        .form-control {
+        .form-control, .form-select {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
@@ -795,21 +704,11 @@ $products = getAllProducts($conn);
             transition: all 0.3s;
             background-color: white;
         }
-
-        .form-control:focus {
+        
+        .form-control:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(26, 60, 139, 0.1);
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-size: 15px;
-            background-color: white;
-            cursor: pointer;
         }
 
         .form-row {
@@ -833,17 +732,13 @@ $products = getAllProducts($conn);
         }
 
         /* File Upload Styles */
-        .file-upload-container {
-            margin-top: 10px;
-        }
-
+        .file-upload-container { margin-top: 10px; }
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
             display: inline-block;
             width: 100%;
         }
-
         .file-input-wrapper input[type=file] {
             position: absolute;
             left: 0;
@@ -853,7 +748,6 @@ $products = getAllProducts($conn);
             width: 100%;
             height: 100%;
         }
-
         .file-input-label {
             display: flex;
             align-items: center;
@@ -866,17 +760,11 @@ $products = getAllProducts($conn);
             transition: all 0.3s;
             width: 100%;
         }
-
         .file-input-label:hover {
             border-color: var(--primary);
             background-color: #eef2ff;
         }
-
-        .upload-icon {
-            color: var(--primary);
-            font-size: 20px;
-        }
-
+        .upload-icon { color: var(--primary); font-size: 20px; }
         .file-name {
             flex-grow: 1;
             color: var(--gray);
@@ -886,11 +774,7 @@ $products = getAllProducts($conn);
             white-space: nowrap;
         }
 
-        .image-preview-container {
-            margin-top: 15px;
-            display: none;
-        }
-
+        .image-preview-container { margin-top: 15px; display: none; }
         .image-preview {
             max-width: 200px;
             max-height: 150px;
@@ -900,20 +784,8 @@ $products = getAllProducts($conn);
             background-color: white;
         }
 
-        .preview-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--secondary);
-            font-size: 14px;
-        }
-
         /* Progress Bar */
-        .progress-container {
-            display: none;
-            margin-top: 15px;
-        }
-
+        .progress-container { display: none; margin-top: 15px; }
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -922,14 +794,12 @@ $products = getAllProducts($conn);
             overflow: hidden;
             margin-bottom: 8px;
         }
-
         .progress-fill {
             height: 100%;
             background-color: var(--primary);
             width: 0%;
             transition: width 0.3s;
         }
-
         .progress-text {
             font-size: 12px;
             color: var(--gray);
@@ -943,7 +813,6 @@ $products = getAllProducts($conn);
             padding: 20px;
             color: var(--primary);
         }
-
         .loading i {
             font-size: 24px;
             animation: spin 1s linear infinite;
@@ -954,12 +823,24 @@ $products = getAllProducts($conn);
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .fade-in { animation: fadeIn 0.5s ease-out; }
 
         /* Price Input Style */
-        .price-input-wrapper {
-            position: relative;
-        }
-
+        .price-input-wrapper { position: relative; }
         .price-input-wrapper::before {
             content: 'Rp';
             position: absolute;
@@ -970,10 +851,7 @@ $products = getAllProducts($conn);
             font-weight: 600;
             z-index: 1;
         }
-
-        .price-input {
-            padding-left: 45px !important;
-        }
+        .price-input { padding-left: 45px !important; }
 
         /* Stock Badge */
         .stock-badge {
@@ -987,18 +865,9 @@ $products = getAllProducts($conn);
             color: white;
             z-index: 1;
         }
-
-        .stock-badge.high {
-            background-color: var(--success);
-        }
-
-        .stock-badge.low {
-            background-color: var(--warning);
-        }
-
-        .stock-badge.none {
-            background-color: var(--danger);
-        }
+        .stock-badge.high { background-color: var(--success); }
+        .stock-badge.low { background-color: var(--warning); }
+        .stock-badge.none { background-color: var(--danger); }
 
         /* Notification */
         .notification {
@@ -1017,28 +886,9 @@ $products = getAllProducts($conn);
             z-index: 1001;
             animation: slideIn 0.3s ease-out;
         }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .notification.success {
-            background-color: var(--success);
-        }
-
-        .notification.error {
-            background-color: var(--danger);
-        }
-
-        .notification.warning {
-            background-color: var(--warning);
-        }
-
-        .notification.info {
-            background-color: var(--primary);
-        }
-
+        .notification.success { background-color: var(--success); }
+        .notification.error { background-color: var(--danger); }
+        .notification.warning { background-color: var(--warning); }
         .close-notification {
             background: none;
             border: none;
@@ -1051,100 +901,32 @@ $products = getAllProducts($conn);
 
         /* Responsive */
         @media (max-width: 1200px) {
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
         }
 
         @media (max-width: 992px) {
-            .sidebar {
-                width: 80px;
-            }
-            
-            .sidebar .logo h1, 
-            .sidebar .logo h2,
-            .nav-link span {
-                display: none;
-            }
-            
-            .sidebar .logo {
-                padding: 20px 10px;
-                text-align: center;
-            }
-            
-            .nav-link i {
-                margin-right: 0;
-                font-size: 20px;
-            }
-            
-            .nav-link {
-                justify-content: center;
-                padding: 15px;
-            }
-            
-            .main-content {
-                margin-left: 80px;
-            }
+            .sidebar { width: 80px; }
+            .sidebar .logo h1, .sidebar .logo h2, .nav-link span { display: none; }
+            .sidebar .logo { padding: 20px 10px; text-align: center; }
+            .nav-link i { margin-right: 0; font-size: 20px; }
+            .nav-link { justify-content: center; padding: 15px; }
+            .main-content { margin-left: 80px; }
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                padding: 15px;
-            }
-            
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .user-info {
-                align-self: flex-end;
-                margin-top: 10px;
-            }
-            
-            .filter-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .filter-actions {
-                justify-content: flex-start;
-            }
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
+            .main-content { padding: 15px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .user-info { align-self: flex-end; margin-top: 10px; }
+            .filter-section { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .products-grid { grid-template-columns: 1fr; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .filter-actions { justify-content: flex-start; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Sidebar -->
         <aside class="sidebar">
         <div class="logo">
             <h1>Megatek</h1>
@@ -1163,7 +945,7 @@ $products = getAllProducts($conn);
                     <span>Produk</span>
                 </a>
             </li>
-           
+            
             <li class="nav-item">
                 <a href="pesanan.php" class="nav-link">
                     <i class="fas fa-shopping-cart"></i>
@@ -1196,10 +978,7 @@ $products = getAllProducts($conn);
         </ul>
     </aside>
 
-
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
             <header class="header">
             <h1>Manajemen Produk</h1>
             <div class="user-info">
@@ -1208,7 +987,6 @@ $products = getAllProducts($conn);
             </div>
         </header>
 
-            <!-- Filter Section -->
             <section class="filter-section fade-in">
                 <div class="filter-group">
                     <label class="filter-label">Cari Produk</label>
@@ -1246,7 +1024,6 @@ $products = getAllProducts($conn);
                 </div>
             </section>
 
-            <!-- Products Section -->
             <section class="products-section fade-in">
                 <div class="section-header">
                     <h2 class="section-title">Daftar Produk</h2>
@@ -1343,14 +1120,12 @@ $products = getAllProducts($conn);
                 </div>
             </section>
 
-            <!-- Footer -->
             <footer class="footer">
                 <p>&copy; 2025 PT Megatek Industrial Persada - Your Trusted Industrial Partner</p>
             </footer>
         </main>
     </div>
 
-    <!-- Modal Tambah/Edit Produk -->
     <div class="modal" id="productModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1358,7 +1133,6 @@ $products = getAllProducts($conn);
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Loading Indicator -->
                 <div class="loading" id="loadingIndicator">
                     <i class="fas fa-spinner"></i>
                     <p>Memproses...</p>
@@ -1367,14 +1141,14 @@ $products = getAllProducts($conn);
                 <form id="productForm" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="productName" class="form-label">Nama Produk *</label>
-                        <input type="text" id="productName" name="productName" class="form-control" 
+                        <input type="text" id="productName" name="name" class="form-control" 
                                placeholder="Contoh: Sparepart Pro X200" required>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label for="productCategory" class="form-label">Kategori *</label>
-                            <select id="productCategory" name="productCategory" class="form-select" required>
+                            <select id="productCategory" name="category" class="form-select" required>
                                 <option value="">Pilih Kategori</option>
                                 <option value="Sparepart">Sparepart</option>
                                 <option value="FBR Burner">FBR Burner</option>
@@ -1384,8 +1158,7 @@ $products = getAllProducts($conn);
                         </div>
                         <div class="form-group price-input-wrapper">
                             <label for="productPrice" class="form-label">Harga (Rp) *</label>
-                            <!-- PERUBAHAN DI SINI: type="text" bukan "number" -->
-                            <input type="text" id="productPrice" name="productPrice" class="form-control price-input" 
+                            <input type="text" id="productPrice" class="form-control price-input" 
                                    placeholder="12.500.000" required oninput="formatPrice(this)">
                         </div>
                     </div>
@@ -1393,12 +1166,12 @@ $products = getAllProducts($conn);
                     <div class="form-row">
                         <div class="form-group">
                             <label for="productStock" class="form-label">Stok *</label>
-                            <input type="number" id="productStock" name="productStock" class="form-control" 
+                            <input type="number" id="productStock" name="stock" class="form-control" 
                                    placeholder="15" required min="0">
                         </div>
                         <div class="form-group">
                             <label for="productStatus" class="form-label">Status *</label>
-                            <select id="productStatus" name="productStatus" class="form-select" required>
+                            <select id="productStatus" name="status" class="form-select" required>
                                 <option value="active">Aktif</option>
                                 <option value="inactive">Tidak Aktif</option>
                             </select>
@@ -1415,10 +1188,9 @@ $products = getAllProducts($conn);
                                     <i class="fas fa-file-image"></i>
                                 </div>
                                 <input type="file" id="productImageFile" name="productImageFile" 
-                                       accept=".png,.jpg,.jpeg,.webp">
+                                     accept=".png,.jpg,.jpeg,.webp">
                             </div>
                             
-                            <!-- Progress Bar -->
                             <div class="progress-container" id="progressContainer">
                                 <div class="progress-bar">
                                     <div class="progress-fill" id="progressFill"></div>
@@ -1426,7 +1198,6 @@ $products = getAllProducts($conn);
                                 <div class="progress-text" id="progressText">0%</div>
                             </div>
                             
-                            <!-- Image Preview -->
                             <div class="image-preview-container" id="imagePreviewContainer">
                                 <label class="preview-label">Preview:</label>
                                 <img id="imagePreview" class="image-preview" src="" alt="Preview gambar">
@@ -1439,15 +1210,14 @@ $products = getAllProducts($conn);
                     
                     <div class="form-group">
                         <label for="productDescription" class="form-label">Deskripsi Produk</label>
-                        <textarea id="productDescription" name="productDescription" class="form-control form-textarea" 
+                        <textarea id="productDescription" name="description" class="form-control form-textarea" 
                                   rows="4" placeholder="Deskripsi lengkap produk..."></textarea>
                     </div>
                     
-                    <!-- Featured dan Popular flags -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" style="display: flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" id="productFeatured" name="productFeatured" value="1" style="margin-right: 10px;">
+                                <input type="checkbox" id="productFeatured" name="featured" value="1" style="margin-right: 10px;">
                                 <span>Produk Unggulan</span>
                             </label>
                             <small style="color: var(--gray); font-size: 12px; display: block; margin-top: 5px;">
@@ -1456,7 +1226,7 @@ $products = getAllProducts($conn);
                         </div>
                         <div class="form-group">
                             <label class="form-label" style="display: flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" id="productPopular" name="productPopular" value="1" style="margin-right: 10px;">
+                                <input type="checkbox" id="productPopular" name="popular" value="1" style="margin-right: 10px;">
                                 <span>Produk Populer</span>
                             </label>
                             <small style="color: var(--gray); font-size: 12px; display: block; margin-top: 5px;">
@@ -1466,7 +1236,7 @@ $products = getAllProducts($conn);
                     </div>
                     
                     <input type="hidden" id="productId" name="productId">
-                    <input type="hidden" id="existingImage" name="existingImage">
+                    <input type="hidden" id="existingImage" name="existing_image">
                     <input type="hidden" name="action" value="save">
                 </form>
             </div>
@@ -1477,7 +1247,6 @@ $products = getAllProducts($conn);
         </div>
     </div>
 
-    <!-- Modal Konfirmasi Hapus -->
     <div class="modal" id="deleteModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1551,7 +1320,7 @@ $products = getAllProducts($conn);
             // Update nilai input
             input.value = value;
             
-            // Return nilai numerik untuk database
+            // Return nilai numerik untuk database (optional usage)
             return value.replace(/\./g, '');
         }
 
@@ -1621,13 +1390,14 @@ $products = getAllProducts($conn);
                         <i class="fas fa-box-open" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
                         <h3 style="margin-bottom: 10px; font-weight: 600;">Tidak ada produk ditemukan</h3>
                         <p style="margin-bottom: 20px;">Coba ubah filter pencarian atau tambahkan produk baru.</p>
-                        <button class="btn btn-primary" id="addFirstProductBtn">
+                        <button class="btn btn-primary" id="addFirstProductBtnJs">
                             <i class="fas fa-plus"></i> Tambah Produk Pertama
                         </button>
                     </div>
                 `;
                 
-                document.getElementById('addFirstProductBtn')?.addEventListener('click', addProduct);
+                // Add event listener to the dynamically created button
+                document.getElementById('addFirstProductBtnJs')?.addEventListener('click', addProduct);
                 totalProductsElement.textContent = '0';
                 return;
             }
@@ -1707,38 +1477,39 @@ $products = getAllProducts($conn);
         }
 
         // Edit produk
-        async function editProduct(id) {
-            try {
-                const response = await fetch(`get_product.php?id=${id}`);
-                const product = await response.json();
+        function editProduct(id) {
+            // Kita ambil data dari array products saja agar cepat, tidak perlu fetch lagi jika data sudah ada
+            const product = products.find(p => p.id == id);
+            
+            if (product) {
+                isEditMode = true;
+                modalTitle.textContent = 'Edit Produk';
                 
-                if (product) {
-                    isEditMode = true;
-                    modalTitle.textContent = 'Edit Produk';
-                    
-                    document.getElementById('productId').value = product.id;
-                    document.getElementById('productName').value = product.name;
-                    document.getElementById('productCategory').value = product.category;
-                    document.getElementById('productPrice').value = new Intl.NumberFormat('id-ID').format(product.price);
-                    document.getElementById('productStock').value = product.stock;
-                    document.getElementById('productStatus').value = product.status;
-                    document.getElementById('productDescription').value = product.description;
-                    document.getElementById('productFeatured').checked = product.featured == 1;
-                    document.getElementById('productPopular').checked = product.popular == 1;
-                    document.getElementById('existingImage').value = product.image_url || '';
-                    
-                    // Tampilkan preview gambar jika ada
-                    if (product.image_url) {
-                        imagePreview.src = product.image_url;
-                        imagePreviewContainer.style.display = 'block';
-                        fileName.textContent = 'Gambar saat ini: ' + product.image_url.split('/').pop();
-                    }
-                    
-                    productModal.style.display = 'flex';
+                document.getElementById('productId').value = product.id;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productCategory').value = product.category;
+                document.getElementById('productPrice').value = new Intl.NumberFormat('id-ID').format(product.price);
+                document.getElementById('productStock').value = product.stock;
+                document.getElementById('productStatus').value = product.status;
+                document.getElementById('productDescription').value = product.description;
+                document.getElementById('productFeatured').checked = product.featured == 1;
+                document.getElementById('productPopular').checked = product.popular == 1;
+                document.getElementById('existingImage').value = product.image_url || '';
+                
+                // Tampilkan preview gambar jika ada
+                if (product.image_url) {
+                    // Fix path gambar jika relatif
+                    imagePreview.src = product.image_url;
+                    imagePreviewContainer.style.display = 'block';
+                    fileName.textContent = 'Gambar saat ini: ' + product.image_url.split('/').pop();
+                } else {
+                     imagePreviewContainer.style.display = 'none';
+                     fileName.textContent = 'Pilih file gambar (PNG, JPG, JPEG)';
                 }
-            } catch (error) {
-                console.error('Error loading product:', error);
-                showNotification('Gagal memuat data produk', 'error');
+                
+                productModal.style.display = 'flex';
+            } else {
+                 showNotification('Data produk tidak ditemukan di list lokal', 'error');
             }
         }
 
@@ -1760,69 +1531,10 @@ $products = getAllProducts($conn);
             }
         }
 
-        // Upload gambar
-        async function uploadImage(file) {
-            return new Promise((resolve, reject) => {
-                if (!file) {
-                    resolve('');
-                    return;
-                }
-                
-                // Validasi file
-                if (file.size > 5 * 1024 * 1024) {
-                    reject('Ukuran file terlalu besar (maks 5MB)');
-                    return;
-                }
-                
-                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-                if (!validTypes.includes(file.type)) {
-                    reject('Format file tidak didukung');
-                    return;
-                }
-                
-                const formData = new FormData();
-                formData.append('image', file);
-                formData.append('action', 'upload_image');
-                
-                const xhr = new XMLHttpRequest();
-                
-                xhr.upload.addEventListener('progress', function(e) {
-                    if (e.lengthComputable) {
-                        const percentComplete = (e.loaded / e.total) * 100;
-                        progressFill.style.width = percentComplete + '%';
-                        progressText.textContent = Math.round(percentComplete) + '%';
-                    }
-                });
-                
-                xhr.addEventListener('load', function() {
-                    if (xhr.status === 200) {
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                resolve(response.filepath);
-                            } else {
-                                reject(response.message);
-                            }
-                        } catch (e) {
-                            reject('Error parsing response');
-                        }
-                    } else {
-                        reject('Upload failed');
-                    }
-                });
-                
-                xhr.addEventListener('error', function() {
-                    reject('Network error');
-                });
-                
-                progressContainer.style.display = 'block';
-                xhr.open('POST', 'produk.php', true);
-                xhr.send(formData);
-            });
-        }
-
         // Simpan produk
-        async function saveProduct() {
+        async function saveProduct(e) {
+            e.preventDefault(); // Mencegah reload form
+            
             const id = document.getElementById('productId').value;
             const name = document.getElementById('productName').value;
             const category = document.getElementById('productCategory').value;
@@ -1836,7 +1548,7 @@ $products = getAllProducts($conn);
             const imageFile = productImageFile.files[0];
             
             // Validasi
-            if (!name || !category || !price || !stock) {
+            if (!name || !category || isNaN(price) || isNaN(stock)) {
                 showNotification('Harap lengkapi semua field yang wajib diisi!', 'warning');
                 return;
             }
@@ -1860,7 +1572,7 @@ $products = getAllProducts($conn);
             formData.append('productId', id);
             formData.append('name', name);
             formData.append('category', category);
-            formData.append('price', price);
+            formData.append('price', price); // Kirim integer murni
             formData.append('stock', stock);
             formData.append('status', status);
             formData.append('description', description);
@@ -1878,17 +1590,30 @@ $products = getAllProducts($conn);
                     body: formData
                 });
                 
-                const result = await response.json();
+                // Parse sebagai text dulu untuk debugging jika bukan JSON valid
+                const textResult = await response.text();
                 
-                if (result.success) {
-                    // Reload halaman untuk update data
-                    window.location.reload();
-                } else {
-                    showNotification('Gagal menyimpan produk: ' + result.message, 'error');
+                try {
+                     const result = JSON.parse(textResult);
+                     if (result.success) {
+                        showNotification(result.message, 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showNotification('Gagal menyimpan produk: ' + result.message, 'error');
+                         loadingIndicator.style.display = 'none';
+                         saveProductBtn.disabled = false;
+                    }
+                } catch (e) {
+                     console.error("Server Error Response:", textResult);
+                     showNotification('Terjadi kesalahan server (Invalid JSON). Cek Console.', 'error');
+                     loadingIndicator.style.display = 'none';
+                     saveProductBtn.disabled = false;
                 }
+
             } catch (error) {
-                showNotification('Terjadi kesalahan: ' + error.message, 'error');
-            } finally {
+                showNotification('Terjadi kesalahan koneksi: ' + error.message, 'error');
                 loadingIndicator.style.display = 'none';
                 saveProductBtn.disabled = false;
             }
@@ -1918,13 +1643,17 @@ $products = getAllProducts($conn);
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Reload halaman
-                    window.location.reload();
+                    showNotification('Produk berhasil dihapus', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
                     showNotification('Gagal menghapus produk: ' + result.message, 'error');
+                    closeDeleteModal();
                 }
             } catch (error) {
                 showNotification('Terjadi kesalahan: ' + error.message, 'error');
+                closeDeleteModal();
             }
         }
 
