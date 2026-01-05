@@ -28,7 +28,7 @@ if (!$product) {
 // Handle add to cart
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     if (!isLoggedIn()) {
-        header('Location: index.php?login_required=1&redirect=detailproduk.php?id=' . $product_id);
+        header('Location: beranda.php?login_required=1&redirect=detailproduk.php?id=' . $product_id);
         exit();
     }
     
@@ -1119,9 +1119,9 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
 </head>
 <body>
 
-    <!-- Main Navbar -->
+<!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="index.php">
+        <a class="navbar-brand mx-2" href="beranda.php">
             <img src="gambar/LOGO.png" alt="Megatek Logo">
         </a>
 
@@ -1133,23 +1133,58 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
         </div>
 
         <div class="nav-icons">
-            <a href="keranjang.php" class="nav-icon">
+            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
                 <div style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge" id="cartCount">0</span>
+                    <span class="cart-badge" id="cartCount">
+                        <?php 
+                        if (isLoggedIn()) {
+                            $user_id = $_SESSION['user_id'];
+                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+                            echo $cart_count;
+                        } else {
+                            echo '0';
+                        }
+                        ?>
+                    </span>
                 </div>
-                <span>Cart</span>
+                <span>Keranjang</span>
             </a>
             
             <div id="userSection">
                 <?php if (isLoggedIn()): ?>
+                    <!-- User sudah login -->
                     <div class="user-dropdown">
-                        <a href="javascript:void(0);" class="nav-icon">
+                        <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
                             <i class="fas fa-user"></i>
-                            <span>Akun</span>
+                            <span>
+                                <?php 
+                                if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
+                                    echo htmlspecialchars($_SESSION['first_name']);
+                                } else {
+                                    echo 'Akun';
+                                }
+                                ?>
+                            </span>
                         </a>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <span class="dropdown-item-text">
+                                <small>Logged in as:</small><br>
+                                <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
+                            </span>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a>
+                            <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
+                            <a class="dropdown-item" href="wishlist.php"><i class="fas fa-heart me-2"></i>Wishlist</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </div>
                     </div>
                 <?php else: ?>
+                    <!-- User belum login -->
                     <a href="javascript:void(0);" class="nav-icon" id="userLogin">
                         <i class="fas fa-user"></i>
                         <span>Masuk/Daftar</span>
@@ -1174,10 +1209,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
 
     <!-- Breadcrumb -->
     <div class="breadcrumb">
-        <a href="index.php">Home</a> &gt;
-        <a href="produk.php">Produk</a> &gt;
-        <a href="produk.php?category=<?php echo urlencode($product['category']); ?>"><?php echo htmlspecialchars($product['category']); ?></a> &gt;
-        <span><?php echo htmlspecialchars($product['name']); ?></span>
+        
     </div>
 
     <!-- Product Detail Container -->
@@ -1205,16 +1237,6 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
 
             <!-- Product Info -->
             <div class="product-info">
-                <div class="product-category">
-                    <?php echo htmlspecialchars($product['category']); ?>
-                    <?php if ($product['featured']): ?>
-                        <span class="badge bg-warning ms-2">Unggulan</span>
-                    <?php endif; ?>
-                    <?php if ($product['popular']): ?>
-                        <span class="badge bg-danger ms-2">Populer</span>
-                    <?php endif; ?>
-                </div>
-                
                 <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
                 
                 <div class="product-meta">
@@ -1441,7 +1463,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
                     <?php foreach ($related_products as $related): ?>
                         <div class="product-card">
                             <?php if ($related['featured']): ?>
-                                <div class="product-badge">Unggulan</div>
+                                
                             <?php endif; ?>
                             
                             <div class="product-image">
@@ -1481,9 +1503,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
                 <div class="products-grid">
                     <?php foreach ($popular_products as $popular): ?>
                         <div class="product-card">
-                            <?php if ($popular['featured']): ?>
-                                <div class="product-badge">Unggulan</div>
-                            <?php endif; ?>
+                            
                             
                             <div class="product-image">
                                 <img src="<?php echo htmlspecialchars($popular['image_url']); ?>" alt="<?php echo htmlspecialchars($popular['name']); ?>">
