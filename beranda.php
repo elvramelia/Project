@@ -797,7 +797,7 @@ try {
                     <?php foreach ($featured_products as $product): ?>
                         <div class="col-md-3 col-sm-6 mb-4">
                             <a href="detailproduk.php?id=<?php echo $product['id']; ?>" class="featured-card">
-                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                                <img src="uploads/<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                                 <p class="mt-2"><?php echo htmlspecialchars($product['name']); ?></p>
                                 <div class="product-price">
                                     Rp <?php echo number_format($product['price'], 0, ',', '.'); ?>
@@ -823,7 +823,7 @@ try {
                     <?php foreach ($popular_products as $product): ?>
                         <div class="col-md-4 col-sm-6 mb-4">
                             <a href="detailproduk.php?id=<?php echo $product['id']; ?>" class="popular-card">
-                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                                <img src="uploads/<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                                 <p><?php echo htmlspecialchars($product['name']); ?></p>
                                 <div class="product-price">
                                     Rp <?php echo number_format($product['price'], 0, ',', '.'); ?>

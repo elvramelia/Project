@@ -1225,11 +1225,11 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="main-image" id="mainImage">
-                    <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" id="currentImage">
+                    <img src="uploads/<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" id="currentImage">
                 </div>
                 <div class="image-thumbnails">
                     <div class="thumbnail active" data-image="<?php echo htmlspecialchars($product['image_url']); ?>">
-                        <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                        <img src="uploads/<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                     </div>
                     <!-- Additional thumbnails can be added here -->
                 </div>
@@ -1467,7 +1467,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
                             <?php endif; ?>
                             
                             <div class="product-image">
-                                <img src="<?php echo htmlspecialchars($related['image_url']); ?>" alt="<?php echo htmlspecialchars($related['name']); ?>">
+                                <img src="uploads/<?php echo htmlspecialchars($related['image_url']); ?>" alt="<?php echo htmlspecialchars($related['name']); ?>">
                             </div>
                             
                             <div class="product-info-small">
@@ -1506,7 +1506,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
                             
                             
                             <div class="product-image">
-                                <img src="<?php echo htmlspecialchars($popular['image_url']); ?>" alt="<?php echo htmlspecialchars($popular['name']); ?>">
+                                <img src="uploads/<?php echo htmlspecialchars($popular['image_url']); ?>" alt="<?php echo htmlspecialchars($popular['name']); ?>">
                             </div>
                             
                             <div class="product-info-small">
