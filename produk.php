@@ -1131,7 +1131,9 @@ try {
                         <?php endif; ?>
                         
                         <div class="product-image">
-                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                            <img src="uploads/<?php echo htmlspecialchars($product['image_url']); ?>" 
+                            alt="<?php echo htmlspecialchars($product['name']); ?>">
+
                         </div>
                         
                         <div class="product-info">
