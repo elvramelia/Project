@@ -927,7 +927,7 @@ require_once 'config/check_login.php';
             <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
             <a href="produk.php" class="menu-category">Produk</a>
             <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
-            <a href="promo.php" class="menu-category">Promo</a>
+           
         </div>
     </div>
 

@@ -990,20 +990,7 @@
         </div>
 
         <!-- Active Banners -->
-        <div class="banners-section fade-in" style="animation-delay: 0.4s;">
-            <div class="section-header">
-                <h2 class="section-title">Banner Aktif</h2>
-                <div>
-                    <button class="btn btn-outline" id="refreshBannersBtn">
-                        <i class="fa-solid fa-rotate"></i> Refresh
-                    </button>
-                </div>
-            </div>
-
-            <div class="banners-grid" id="bannersGrid">
-                <!-- Banner cards will be loaded here via JavaScript -->
-            </div>
-        </div>
+        
 
         <!-- Footer -->
         <footer class="footer">
