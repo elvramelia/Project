@@ -1,63 +1,7 @@
 <?php
 require_once 'config/database.php';
 require_once 'config/check_login.php';
-
-// Handle contact form submission
-$success_message = '';
-$error_message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $subject = trim($_POST['subject'] ?? '');
-    $message = trim($_POST['message'] ?? '');
-    
-    // Validation
-    $errors = [];
-    
-    if (empty($name)) {
-        $errors[] = 'Nama harus diisi';
-    }
-    
-    if (empty($email)) {
-        $errors[] = 'Email harus diisi';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Email tidak valid';
-    }
-    
-    if (empty($subject)) {
-        $errors[] = 'Subjek harus diisi';
-    }
-    
-    if (empty($message)) {
-        $errors[] = 'Pesan harus diisi';
-    }
-    
-    if (empty($errors)) {
-        try {
-            // Insert into database
-            $stmt = $conn->prepare("INSERT INTO contact_messages (name, email, phone, subject, message, status) VALUES (?, ?, ?, ?, ?, 'pending')");
-            $stmt->bind_param("sssss", $name, $email, $phone, $subject, $message);
-            
-            if ($stmt->execute()) {
-                $success_message = 'Pesan Anda telah berhasil dikirim. Kami akan menghubungi Anda dalam waktu 1-2 hari kerja.';
-                
-                // Clear form
-                $name = $email = $phone = $subject = $message = '';
-                
-                // Optionally send email notification
-                // mail('admin@megatek.co.id', 'New Contact Message: ' . $subject, $message);
-            } else {
-                $error_message = 'Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.';
-            }
-        } catch (Exception $e) {
-            $error_message = 'Terjadi kesalahan: ' . $e->getMessage();
-        }
-    } else {
-        $error_message = implode('<br>', $errors);
-    }
-}
+// Kode pemrosesan form dihapus karena halaman ini hanya informasi
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -815,7 +759,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-    <!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
         <a class="navbar-brand mx-2" href="beranda.php">
             <img src="gambar/LOGO.png" alt="Megatek Logo">
@@ -850,7 +793,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div id="userSection">
                 <?php if (isLoggedIn()): ?>
-                    <!-- User sudah login -->
                     <div class="user-dropdown">
                         <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
                             <i class="fas fa-user"></i>
@@ -880,7 +822,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
                 <?php else: ?>
-                    <!-- User belum login -->
                     <a href="javascript:void(0);" class="nav-icon" id="userLogin">
                         <i class="fas fa-user"></i>
                         <span>Masuk/Daftar</span>
@@ -890,8 +831,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </nav>
 
-    <!-- Main Menu Horizontal -->
-   <div class="main-menu">
+    <div class="main-menu">
         <div class="menu-container">
             <a href="beranda.php" class="menu-category <?php echo basename($_SERVER['PHP_SELF']) == 'produk.php' ? 'active' : ''; ?>">
                 <span>Beranda</span>
@@ -899,12 +839,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
             <a href="produk.php" class="menu-category">Produk</a>
             <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
-           
         </div>
     </div>
 
 
-    <!-- Contact Hero Section -->
     <section class="contact-hero">
         <div class="container">
             <h1>Hubungi Kami</h1>
@@ -912,13 +850,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </section>
 
-    <!-- Contact Container -->
     <div class="contact-container">
-        <!-- Contact Grid -->
+        
         <div class="contact-grid">
-            <!-- Contact Info -->
+            
             <div class="contact-info-card">
-                <h3>Informasi Kontak</h3>
+                <h3>Lokasi & Kontak</h3>
                 
                 <div class="contact-item">
                     <div class="contact-icon">
@@ -941,10 +878,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h4>Telepon & WhatsApp</h4>
                         <p>+62 31 1234 5678 (Office)</p>
                         <p>+62 812 3456 7890 (WhatsApp)</p>
-                        <p>Senin - Jumat: 08:00 - 17:00 WIB</p>
-                        <p>Sabtu: 08:00 - 12:00 WIB</p>
                     </div>
                 </div>
+            </div>
+            
+            <div class="contact-info-card">
+                <h3>Layanan Pelanggan</h3>
                 
                 <div class="contact-item">
                     <div class="contact-icon">
@@ -971,128 +910,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
             
-            <!-- Contact Form -->
-            <div class="contact-form-container">
-                <h3>Kirim Pesan</h3>
-                <p>Isi formulir di bawah ini dan kami akan menghubungi Anda secepatnya.</p>
-                
-                <?php if ($success_message): ?>
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i> <?php echo $success_message; ?>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($error_message): ?>
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i> <?php echo $error_message; ?>
-                    </div>
-                <?php endif; ?>
-                
-                <form method="POST" action="">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="name">Nama Lengkap *</label>
-                            <input type="text" class="form-control" id="name" name="name" 
-                                   value="<?php echo htmlspecialchars($name ?? ''); ?>" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" class="form-control" id="email" name="email" 
-                                   value="<?php echo htmlspecialchars($email ?? ''); ?>" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="phone">Nomor Telepon</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" 
-                               value="<?php echo htmlspecialchars($phone ?? ''); ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="subject">Subjek *</label>
-                        <select class="form-control" id="subject" name="subject" required>
-                            <option value="">Pilih Subjek</option>
-                            <option value="Pertanyaan Produk" <?php echo ($subject ?? '') == 'Pertanyaan Produk' ? 'selected' : ''; ?>>Pertanyaan Produk</option>
-                            <option value="Penawaran Harga" <?php echo ($subject ?? '') == 'Penawaran Harga' ? 'selected' : ''; ?>>Penawaran Harga</option>
-                            <option value="Dukungan Teknis" <?php echo ($subject ?? '') == 'Dukungan Teknis' ? 'selected' : ''; ?>>Dukungan Teknis</option>
-                            <option value="Keluhan" <?php echo ($subject ?? '') == 'Keluhan' ? 'selected' : ''; ?>>Keluhan</option>
-                            <option value="Kemitraan" <?php echo ($subject ?? '') == 'Kemitraan' ? 'selected' : ''; ?>>Kemitraan</option>
-                            <option value="Lainnya" <?php echo ($subject ?? '') == 'Lainnya' ? 'selected' : ''; ?>>Lainnya</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="message">Pesan *</label>
-                        <textarea class="form-control" id="message" name="message" rows="5" required><?php echo htmlspecialchars($message ?? ''); ?></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-paper-plane"></i> Kirim Pesan
-                    </button>
-                </form>
-            </div>
-        </div>
-        
-        <!-- Map Section -->
-        <div class="map-section">
-            <h3 style="color: var(--primary-blue); margin-bottom: 20px;">Lokasi Kami</h3>
+        </div> <div class="map-section" style="margin-top: 20px;">
+            <h3 style="color: var(--primary-blue); margin-bottom: 20px;">Peta Lokasi</h3>
             <div class="map-container">
                 <div class="map-placeholder">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <h4>PT. Megatek Industrial Persada</h4>
-                    <p>Jl. Raya Industri No. 123, Surabaya, Jawa Timur</p>
-                    <!-- In a real implementation, you would embed Google Maps here -->
-                   <iframe src="https://maps.app.goo.gl/MWNDLGMnQFRaah966?g_st=ipc" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.558352661066!2d112.7354!3d-7.2575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN8KwMTUnMjcuMCJTIDExMsKwNDQnMDcuNCJF!5e0!3m2!1sen!2sid!4v1234567890" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
         </div>
         
-        <!-- FAQ Section -->
-        <div class="faq-section">
-            <div class="faq-title">
-                <h2>Pertanyaan yang Sering Diajukan</h2>
-                <p>Temukan jawaban untuk pertanyaan umum tentang produk dan layanan kami</p>
-            </div>
-            
-            <div class="faq-container">
-                <div class="faq-item">
-                    <h4><i class="fas fa-question-circle me-2"></i> Bagaimana cara memesan produk?</h4>
-                    <p>Anda dapat memesan produk melalui website dengan menambahkan produk ke keranjang dan melakukan checkout. Atau, hubungi tim sales kami untuk pemesanan langsung.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h4><i class="fas fa-question-circle me-2"></i> Apa saja metode pembayaran yang tersedia?</h4>
-                    <p>Kami menerima transfer bank, kartu kredit, dan virtual account melalui berbagai bank di Indonesia. Info lengkap tersedia di halaman checkout.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h4><i class="fas fa-question-circle me-2"></i> Berapa lama waktu pengiriman?</h4>
-                    <p>Waktu pengiriman bervariasi tergantung lokasi. Untuk area Surabaya: 1-2 hari kerja, Jawa Timur: 2-3 hari kerja, Luar Jawa: 3-7 hari kerja.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h4><i class="fas fa-question-circle me-2"></i> Apakah tersedia dukungan teknis setelah pembelian?</h4>
-                    <p>Ya, kami menyediakan dukungan teknis gratis untuk semua produk yang dibeli melalui kami. Hubungi tim support kami untuk bantuan teknis.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h4><i class="fas fa-question-circle me-2"></i> Bagaimana kebijakan pengembalian produk?</h4>
-                    <p>Produk dapat dikembalikan dalam waktu 7 hari setelah diterima dengan kondisi belum digunakan dan dalam kemasan asli. Syarat dan ketentuan berlaku.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h4><i class="fas fa-question-circle me-2"></i> Apakah saya bisa mendapatkan katalog produk lengkap?</h4>
-                    <p>Ya, Anda dapat mengunduh katalog produk lengkap kami atau meminta melalui email ke sales@megatek.co.id</p>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Login Modal -->
     <div class="login-modal" id="loginModal">
         <div class="login-content">
-            <button class="close-btn" id="closeLogin">&times;</button>
+            <button class="close-btn" id="closeLogin">×</button>
             <div class="login-header">
                 <h3>Megatek Industrial Persada</h3>
                 <p>Surabaya</p>
@@ -1121,10 +952,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <!-- Register Modal -->
     <div class="register-modal" id="registerModal">
         <div class="register-content">
-            <button class="close-btn" id="closeRegister">&times;</button>
+            <button class="close-btn" id="closeRegister">×</button>
             <div class="login-header">
                 <h3>Megatek Industrial Persada</h3>
                 <p>Surabaya</p>
@@ -1173,7 +1003,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="row">
@@ -1351,11 +1180,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Set active menu
         function setActiveMenu() {
             const menuItems = document.querySelectorAll('.menu-category');
-            const currentPage = 'contact.php';
             
             menuItems.forEach(item => {
-                if (item.textContent.includes('Contact') || 
-                    item.getAttribute('href')?.includes('contact')) {
+                if (item.textContent.includes('Hubungi Kami') || 
+                    item.getAttribute('href')?.includes('hubungikami.php')) {
                     item.classList.add('active');
                 }
             });
@@ -1368,14 +1196,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.addEventListener('DOMContentLoaded', function() {
             updateCartCount();
             setActiveMenu();
-            
-            // Highlight Contact Us in menu
-            const menuLinks = document.querySelectorAll('.menu-category');
-            menuLinks.forEach(link => {
-                if (link.textContent.includes('Contact') || link.getAttribute('href') === 'contact.php') {
-                    link.classList.add('active');
-                }
-            });
         });
     </script>
 </body>

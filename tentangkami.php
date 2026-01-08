@@ -231,26 +231,21 @@ require_once 'config/check_login.php';
         /* About Us Hero Section */
         .about-hero {
             background-color: var(--primary-blue);
-            height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: white;
-            font-weight: 600;
-            font-size: 1.4rem;
-            margin-top: 0;
+            padding: 40px 0;
+            text-align: center;
         }
 
         .about-hero h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .about-hero p {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             max-width: 700px;
-            margin: 0 auto 30px;
+            margin: 0 auto;
             opacity: 0.9;
         }
 
@@ -936,7 +931,7 @@ require_once 'config/check_login.php';
     <section class="about-hero">
         <div class="container">
             <h1>Tentang Kami</h1>
-            <p>Sebagai perusahaan terdepan dalam penyediaan solusi industri, kami berkomitmen untuk memberikan produk dan layanan berkualitas tinggi sejak 2010.</p>
+            <p>Sebagai perusahaan terdepan dalam penyediaan solusi industri, kami berkomitmen untuk memberikan produk dan layanan berkualitas tinggi sejak 2024.</p>
         </div>
     </section>
 
@@ -1038,49 +1033,7 @@ require_once 'config/check_login.php';
     </section>
 
     <!-- Team Section -->
-    <section class="team-section">
-        <div class="container">
-            <div class="section-title">
-                <h2>Tim Kami</h2>
-                <p>Orang-orang di balik kesuksesan Megatek</p>
-            </div>
-            
-            <div class="team-grid">
-                <div class="team-card">
-                    <div class="team-img">
-                        <img src="uploads/team/team1.jpg" alt="CEO Megatek">
-                    </div>
-                    <div class="team-info">
-                        <h4>Budi Santoso</h4>
-                        <div class="position">CEO & Founder</div>
-                        <p>Memiliki pengalaman lebih dari 20 tahun di industri permesinan dan engineering. Memimpin perusahaan dengan visi strategis untuk ekspansi pasar.</p>
-                    </div>
-                </div>
-                
-                <div class="team-card">
-                    <div class="team-img">
-                        <img src="uploads/team/team2.jpg" alt="Technical Director">
-                    </div>
-                    <div class="team-info">
-                        <h4>Agus Wijaya</h4>
-                        <div class="position">Technical Director</div>
-                        <p>Spesialis dalam bidang boiler dan burner dengan sertifikasi internasional. Bertanggung jawab atas kualitas teknis semua produk.</p>
-                    </div>
-                </div>
-                
-                <div class="team-card">
-                    <div class="team-img">
-                        <img src="uploads/team/team3.jpg" alt="Sales Manager">
-                    </div>
-                    <div class="team-info">
-                        <h4>Sari Dewi</h4>
-                        <div class="position">Sales Manager</div>
-                        <p>Memimpin tim penjualan dengan fokus pada pembangunan hubungan jangka panjang dengan klien korporat dan industri.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+   
 
     <!-- Stats Section -->
     <section class="stats-section">
@@ -1116,7 +1069,7 @@ require_once 'config/check_login.php';
                 <h2>Siap Bermitra dengan Kami?</h2>
                 <p>Dapatkan solusi industri terbaik untuk kebutuhan bisnis Anda. Hubungi kami sekarang untuk konsultasi gratis dan penawaran produk yang sesuai dengan kebutuhan spesifik Anda.</p>
                 <div class="cta-buttons">
-                    <a href="contact.php" class="btn-primary">Hubungi Kami</a>
+                    <a href="hubungikami.php" class="btn-primary">Hubungi Kami</a>
                     <a href="produk.php" class="btn-secondary">Lihat Produk</a>
                 </div>
             </div>
@@ -1212,7 +1165,7 @@ require_once 'config/check_login.php';
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="gambar/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
+                    <img src="uploads/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
                     <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>

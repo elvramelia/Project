@@ -250,15 +250,23 @@ try {
 
         /* Banner */
         .banner-master {
-            background-color: var(--primary-blue);
-            height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 1.4rem;
-            margin-top: 0;
+          /* Container pembungkus banner */
+.banner-container {
+    width: 100%;           /* Lebar penuh */
+    max-width: 1200px;     /* Maksimal lebar agar tidak terlalu lebar di layar besar */
+    margin: 20px auto;     /* Posisi tengah (center) */
+    overflow: hidden;      /* Mencegah gambar keluar batas */
+    border-radius: 8px;    /* Opsional: Membuat sudut melengkung supaya cantik */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Opsional: Bayangan halus */
+}
+
+/* Gambar banner itu sendiri */
+.banner-image {
+    width: 100%;           /* Memaksa lebar gambar mengikuti container */
+    height: auto;          /* Tinggi menyesuaikan proporsi (agar tidak gepeng) */
+    display: block;        /* Menghilangkan celah putih kecil di bawah gambar */
+    object-fit: cover;     /* Memastikan gambar mengisi area dengan rapi */
+}
         }
 
         /* Category Section */
@@ -654,7 +662,13 @@ try {
             .navbar-brand img {
                 height: 30px;
             }
+
         }
+
+        
+
+
+
     </style>
 </head>
 <body>
@@ -753,7 +767,7 @@ try {
             $banner = $banner_query->fetch_assoc();
             
             if ($banner && !empty($banner['image_url'])): ?>
-                <img src="uploads/banner/<?php echo htmlspecialchars($banner['image_url']); ?>" 
+                <img src="adminmegatek/uploads/<?php echo htmlspecialchars($banner['image_url']); ?>" 
                      alt="Banner" 
                      class="banner-image">
             <?php else: ?>

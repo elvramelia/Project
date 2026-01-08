@@ -145,6 +145,52 @@ if ($filter !== 'all') {
             padding: 0;
         }
 
+        /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background-color: #ff4444;
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* Cart Hero Section */
+        .cart-hero {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .cart-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .cart-hero p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        /* Cart Container */
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 15px;
+        }
+
+
         /* Reuse all common styles from cart.php */
         .top-bar {
             background-color: #f0f2f5;
@@ -1062,7 +1108,7 @@ if ($filter !== 'all') {
             <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
             <a href="produk.php" class="menu-category">Produk</a>
             <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
-            <a href="promo.php" class="menu-category">Promo</a>
+           
         </div>
     </div>
 
@@ -1199,7 +1245,7 @@ if ($filter !== 'all') {
                                     <?php foreach ($order_items as $item): ?>
                                         <div class="order-item">
                                             <div class="item-image">
-                                                <img src="<?php echo htmlspecialchars($item['image_url'] ?? 'img/produk-sample.png'); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
+                                                <img src="uploads/<?php echo htmlspecialchars($item['image_url'] ?? 'img/produk-sample.png'); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
                                             </div>
                                             <div class="item-details">
                                                 <div class="item-name"><?php echo htmlspecialchars($item['product_name']); ?></div>
@@ -1273,9 +1319,7 @@ if ($filter !== 'all') {
                                 </div>
                                 
                                 <div class="order-actions">
-                                    <a href="order_detail.php?id=<?php echo $order['id']; ?>" class="btn-action btn-view">
-                                        <i class="fas fa-eye"></i> Detail
-                                    </a>
+                                
                                     
                                     <?php if ($order['status'] === 'pending' || $order['status'] === 'processing'): ?>
                                         <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')">
@@ -1286,9 +1330,7 @@ if ($filter !== 'all') {
                                         </form>
                                     <?php endif; ?>
                                     
-                                    <a href="invoice.php?order_id=<?php echo $order['id']; ?>" class="btn-action btn-invoice" target="_blank">
-                                        <i class="fas fa-file-invoice"></i> Invoice
-                                    </a>
+                            
                                     
                                     <?php if ($order['status'] === 'shipped'): ?>
                                         <a href="track_order.php?id=<?php echo $order['id']; ?>" class="btn-action btn-track">
