@@ -945,7 +945,7 @@ require_once 'config/check_login.php';
             
             <div class="company-content">
                 <div class="company-logo">
-                    <img src="gambar/LOGO.png" alt="Megatek Logo">
+                    <img src="uploads/LOGO.png" alt="Megatek Logo">
                 </div>
                 <div class="company-text">
                     <h3>PT. Megatek Industrial Persada</h3>
