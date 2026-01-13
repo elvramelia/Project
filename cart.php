@@ -1029,9 +1029,9 @@ $grand_total = $subtotal + $tax + $shipping;
 
     <!-- Top Bar -->
     <!-- Main Navbar -->
-    <nav class="navbar d-flex align-items-center">
+     <nav class="navbar d-flex align-items-center">
         <a class="navbar-brand mx-2" href="index.php">
-            <img src="gambar/LOGO.png" alt="Megatek Logo">
+            <img src="uploads/LOGO.png" alt="Megatek Logo">
         </a>
 
         <div class="search-bar">
@@ -1042,11 +1042,20 @@ $grand_total = $subtotal + $tax + $shipping;
         </div>
 
         <div class="nav-icons">
-            <a href="keranjang.php" class="nav-icon">
+            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
                 <div style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-badge" id="cartCount">
-                        <?php echo $total_items; ?>
+                        <?php 
+                        if (isLoggedIn()) {
+                            $user_id = $_SESSION['user_id'];
+                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+                            echo $cart_count;
+                        } else {
+                            echo '0';
+                        }
+                        ?>
                     </span>
                 </div>
                 <span>Keranjang</span>
@@ -1074,9 +1083,9 @@ $grand_total = $subtotal + $tax + $shipping;
                                 <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
                             </span>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a>
+                           
                             <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                            <a class="dropdown-item" href="wishlist.php"><i class="fas fa-heart me-2"></i>Wishlist</a>
+                
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>Logout
@@ -1091,7 +1100,7 @@ $grand_total = $subtotal + $tax + $shipping;
                     </a>
                 <?php endif; ?>
             </div>
-        </div>
+                    </div>
     </nav>
 
     <!-- Main Menu Horizontal -->

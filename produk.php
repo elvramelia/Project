@@ -940,16 +940,16 @@ try {
 </head>
   <!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="beranda.php">
-            <img src="gambar/LOGO.png" alt="Megatek Logo">
+        <a class="navbar-brand mx-2" href="index.php">
+            <img src="uploads/LOGO.png" alt="Megatek Logo">
         </a>
 
-        <form method="GET" action="produk.php" class="search-bar">
-            <input type="text" name="search" class="form-control" placeholder="Cari produk, kategori, atau brand" value="<?php echo htmlspecialchars($search); ?>">
-            <button type="submit">
+        <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Cari produk, kategori, atau brand">
+            <button type="button">
                 <i class="fas fa-search"></i>
             </button>
-        </form>
+        </div>
 
         <div class="nav-icons">
             <a href="javascript:void(0);" class="nav-icon" id="cartLink">
@@ -993,9 +993,9 @@ try {
                                 <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
                             </span>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a>
+                           
                             <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                            <a class="dropdown-item" href="wishlist.php"><i class="fas fa-heart me-2"></i>Wishlist</a>
+                
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>Logout
@@ -1010,7 +1010,7 @@ try {
                     </a>
                 <?php endif; ?>
             </div>
-        </div>
+                    </div>
     </nav>
 <!-- Main Menu Horizontal -->
     <div class="main-menu">
@@ -1063,7 +1063,8 @@ try {
             <div class="filter-row">
                 <div class="filter-group">
                     <span class="filter-label">Filter:</span>
-                    <select class="filter-select" id="categoryFilter" onchange="if(this.value) window.location.href='produk.php?category='+this.value">
+                   <select class="filter-select" id="categoryFilter"onchange="if(this.value) window.location.href='produk.php?category=' + encodeURIComponent(this.value)">
+
                         <option value="">Semua Kategori</option>
                         <option value="FBR Burner" <?php echo $category == 'FBR Burner' ? 'selected' : ''; ?>>FBR Burner</option>
                         <option value="Boiler" <?php echo $category == 'Boiler' ? 'selected' : ''; ?>>Boiler</option>
@@ -1099,8 +1100,8 @@ try {
                 <a href="produk.php?category=Boiler" class="category-tag">
                     <i class="fas fa-industry"></i> Boiler
                 </a>
-                <a href="produk.php?category=Valve & Instrumentation" class="category-tag">
-                    <i class="fas fa-gauge-high"></i> Valve
+                <a href="produk.php?category=<?php echo urlencode('Valve & Instrumentation'); ?>" class="category-tag">
+                    <i class="fas fa-gauge-high"></i> Valve & Instrumentation
                 </a>
                 <a href="produk.php?category=Sparepart" class="category-tag">
                     <i class="fas fa-gear"></i> Spare Part
@@ -1312,7 +1313,8 @@ try {
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="gambar/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
+                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
+                    
                     <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>

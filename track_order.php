@@ -2,94 +2,132 @@
 require_once 'config/database.php';
 require_once 'config/check_login.php';
 
-// 1. Cek Login
 if (!isLoggedIn()) {
     header('Location: index.php?login_required=1');
     exit();
 }
 
-// 2. Validasi ID Pesanan
-if (!isset($_GET['id']) || empty($_GET['id'])) {
+$user_id = $_SESSION['user_id'];
+$order_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($order_id === 0) {
     header('Location: orders.php');
     exit();
 }
 
-$order_id = intval($_GET['id']);
-$user_id = $_SESSION['user_id'];
-
-// 3. Ambil Data Pesanan
-// Catatan: Saya menambahkan field 'tracking_number' dan 'courier' pada query. 
-// Pastikan tabel 'orders' Anda memiliki kolom ini, atau hapus bagian tersebut jika belum ada.
-$query = "
-    SELECT o.*, 
-           (SELECT SUM(quantity) FROM order_items WHERE order_id = o.id) as total_items
-    FROM orders o 
+// Fetch order details
+$order_query = "
+    SELECT 
+        o.id,
+        o.order_number,
+        o.total_amount,
+        o.status,
+        o.payment_method,
+        o.shipping_address,
+        o.created_at,
+        o.updated_at
+    FROM orders o
     WHERE o.id = ? AND o.user_id = ?
 ";
 
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare($order_query);
 $stmt->bind_param("ii", $order_id, $user_id);
 $stmt->execute();
-$result = $stmt->get_result();
+$order_result = $stmt->get_result();
 
-if ($result->num_rows === 0) {
-    // Pesanan tidak ditemukan atau bukan milik user ini
+if ($order_result->num_rows === 0) {
     header('Location: orders.php');
     exit();
 }
 
-$order = $result->fetch_assoc();
+$order = $order_result->fetch_assoc();
 
-// 4. Ambil Item Pesanan
+// Fetch order items
 $items_query = "
-    SELECT oi.*, p.image_url, p.name AS product_name
+    SELECT oi.*, p.image_url 
     FROM order_items oi 
     LEFT JOIN products p ON oi.product_id = p.id 
     WHERE oi.order_id = ?
 ";
-$stmt_items = $conn->prepare($items_query);
-$stmt_items->bind_param("i", $order_id);
-$stmt_items->execute();
-$items_result = $stmt_items->get_result();
+$stmt = $conn->prepare($items_query);
+$stmt->bind_param("i", $order_id);
+$stmt->execute();
+$items_result = $stmt->get_result();
 $order_items = $items_result->fetch_all(MYSQLI_ASSOC);
 
-// 5. Logika Timeline Status
-$status_steps = ['pending', 'processing', 'shipped', 'delivered'];
-$current_status = $order['status'];
-$current_step_index = array_search($current_status, $status_steps);
+// Generate tracking number from order number
+$tracking_number = 'TRK-' . str_replace('ORD-', '', $order['order_number']) . '-ID';
 
-// Jika status cancelled, kita set index ke -1 atau handle khusus
-if ($current_status === 'cancelled') {
-    $current_step_index = -1;
-}
+// Status labels
+$status_labels = [
+    'pending' => 'Menunggu Pembayaran',
+    'processing' => 'Diproses',
+    'shipped' => 'Dikirim',
+    'delivered' => 'Selesai',
+    'cancelled' => 'Dibatalkan'
+];
 
-// Data Dummy untuk Riwayat Pengiriman (Karena belum ada API kurir real)
-// Dalam aplikasi nyata, ini diambil dari API JNE/J&T/Sicepat
+// Courier labels
+$courier_labels = [
+    'jne' => 'JNE',
+    'tiki' => 'TIKI',
+    'pos' => 'POS Indonesia',
+    'jnt' => 'J&T Express',
+    'sicepat' => 'SiCepat',
+    'ninja' => 'Ninja Xpress'
+];
+
+// Default values
+$shipping_courier = 'jne';
+$estimated_delivery = date('Y-m-d', strtotime($order['created_at'] . ' +5 days'));
+
+// Tracking history based on order status
 $tracking_history = [];
-if ($current_status == 'pending') {
-    $tracking_history[] = ['date' => $order['created_at'], 'desc' => 'Pesanan berhasil dibuat, menunggu pembayaran.'];
-} elseif ($current_status == 'processing') {
-    $tracking_history[] = ['date' => $order['updated_at'], 'desc' => 'Pembayaran dikonfirmasi. Pesanan sedang diproses oleh gudang.'];
-    $tracking_history[] = ['date' => $order['created_at'], 'desc' => 'Pesanan berhasil dibuat.'];
-} elseif ($current_status == 'shipped') {
-    $tracking_history[] = ['date' => date('Y-m-d H:i:s'), 'desc' => 'Paket telah diserahkan ke kurir pengiriman.'];
-    $tracking_history[] = ['date' => $order['updated_at'], 'desc' => 'Pesanan selesai dikemas dan siap dikirim.'];
-    $tracking_history[] = ['date' => $order['created_at'], 'desc' => 'Pesanan berhasil dibuat.'];
-} elseif ($current_status == 'delivered') {
-    $tracking_history[] = ['date' => $order['updated_at'], 'desc' => 'Paket telah diterima oleh Pelanggan.'];
-    $tracking_history[] = ['date' => date('Y-m-d H:i:s', strtotime($order['updated_at'] . ' - 1 day')), 'desc' => 'Paket sedang diantar kurir ke lokasi tujuan.'];
-    $tracking_history[] = ['date' => date('Y-m-d H:i:s', strtotime($order['updated_at'] . ' - 2 days')), 'desc' => 'Paket keluar dari hub transit Surabaya.'];
-    $tracking_history[] = ['date' => $order['created_at'], 'desc' => 'Pesanan berhasil dibuat.'];
+
+switch ($order['status']) {
+    case 'pending':
+        $tracking_history = [
+            ['status' => 'order_created', 'description' => 'Pesanan dibuat', 'date' => $order['created_at'], 'location' => 'Sistem']
+        ];
+        break;
+        
+    case 'processing':
+        $tracking_history = [
+            ['status' => 'order_created', 'description' => 'Pesanan dibuat', 'date' => $order['created_at'], 'location' => 'Sistem'],
+            ['status' => 'processing', 'description' => 'Pesanan diproses', 'date' => $order['updated_at'] ?: date('Y-m-d H:i:s', strtotime($order['created_at'] . ' +1 day')), 'location' => 'Surabaya']
+        ];
+        break;
+        
+    case 'shipped':
+        $tracking_history = [
+            ['status' => 'order_created', 'description' => 'Pesanan dibuat', 'date' => $order['created_at'], 'location' => 'Sistem'],
+            ['status' => 'processing', 'description' => 'Pesanan diproses', 'date' => date('Y-m-d H:i:s', strtotime($order['created_at'] . ' +1 day')), 'location' => 'Surabaya'],
+            ['status' => 'shipped', 'description' => 'Pesanan dikirim', 'date' => $order['updated_at'] ?: date('Y-m-d H:i:s', strtotime($order['created_at'] . ' +2 days')), 'location' => 'Surabaya'],
+            ['status' => 'estimated', 'description' => 'Estimasi pengiriman', 'date' => $estimated_delivery . ' 17:00:00', 'location' => 'Tujuan']
+        ];
+        break;
+        
+    case 'delivered':
+        $tracking_history = [
+            ['status' => 'order_created', 'description' => 'Pesanan dibuat', 'date' => $order['created_at'], 'location' => 'Sistem'],
+            ['status' => 'processing', 'description' => 'Pesanan diproses', 'date' => date('Y-m-d H:i:s', strtotime($order['created_at'] . ' +1 day')), 'location' => 'Surabaya'],
+            ['status' => 'shipped', 'description' => 'Pesanan dikirim', 'date' => date('Y-m-d H:i:s', strtotime($order['created_at'] . ' +2 days')), 'location' => 'Surabaya'],
+            ['status' => 'delivered', 'description' => 'Pesanan selesai', 'date' => $order['updated_at'] ?: date('Y-m-d H:i:s', strtotime($order['created_at'] . ' +5 days')), 'location' => 'Tujuan']
+        ];
+        break;
+        
+    default:
+        $tracking_history = [
+            ['status' => 'order_created', 'description' => 'Pesanan dibuat', 'date' => $order['created_at'], 'location' => 'Sistem']
+        ];
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lacak Pesanan #<?php echo $order['order_number']; ?> - Megatek</title>
+    <title>Lacak Pesanan - Megatek Industrial Persada</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -99,7 +137,6 @@ if ($current_status == 'pending') {
             --primary-blue: #1a4b8c;
             --light-gray: #f8f9fa;
             --dark-gray: #222;
-            --success-green: #28a745;
         }
 
         body {
@@ -108,441 +145,886 @@ if ($current_status == 'pending') {
             color: var(--dark-gray);
         }
 
-        /* Navbar & Topbar Styles (Sama seperti orders.php agar konsisten) */
-        .top-bar { background-color: #f0f2f5; padding: 5px 0; font-size: 12px; border-bottom: 1px solid #e0e0e0; }
-        .navbar { background-color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 10px 20px; }
-        .navbar-brand img { height: 40px; }
-        .nav-icons { display: flex; align-items: center; gap: 20px; }
-        .nav-icon { display: flex; flex-direction: column; align-items: center; color: #666; text-decoration: none; font-size: 12px; }
-        .nav-icon:hover { color: var(--primary-blue); }
-        
-        /* Main Menu */
-        .main-menu { background-color: white; border-bottom: 1px solid #e0e0e0; margin-bottom: 30px; }
-        .menu-container { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; gap: 30px; }
-        .menu-category { padding: 15px 0; color: var(--dark-gray); text-decoration: none; font-weight: 500; border-bottom: 3px solid transparent; }
-        .menu-category:hover, .menu-category.active { color: var(--primary-blue); border-bottom-color: var(--primary-blue); }
+        /* Navbar Styling */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px 20px;
+        }
 
-        /* Tracking Layout */
-        .track-container {
-            max-width: 1000px;
-            margin: 0 auto 50px;
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        .search-bar {
+            flex-grow: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-bar input {
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            padding: 10px 45px 10px 20px;
+            font-size: 14px;
+            width: 100%;
+            background-color: #f8f9fa;
+        }
+
+        .search-bar button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 12px;
+            min-width: 50px;
+        }
+
+        .nav-icon i {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        .nav-icon:hover {
+            color: var(--primary-blue);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background-color: #ff4444;
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* Main Menu */
+        .main-menu {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }
+
+        .menu-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .menu-category {
+            color: var(--dark-gray);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 0;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .menu-category:hover,
+        .menu-category.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        /* Hero Section */
+        .tracking-hero {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .tracking-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .tracking-hero p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        /* Tracking Container */
+        .tracking-container {
+            max-width: 1200px;
+            margin: 40px auto;
             padding: 0 15px;
         }
 
-        .back-link {
+        /* Back Button */
+        .btn-back {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #666;
+            color: var(--primary-blue);
             text-decoration: none;
-            margin-bottom: 20px;
             font-weight: 500;
-        }
-        .back-link:hover { color: var(--primary-blue); }
-
-        .track-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            overflow: hidden;
-            margin-bottom: 30px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+            transition: all 0.3s;
         }
 
-        .track-header {
-            background-color: var(--primary-blue);
-            color: white;
-            padding: 25px;
+        .btn-back:hover {
+            background-color: #f8f9fa;
+            border-color: var(--primary-blue);
+        }
+
+        /* Tracking Card */
+        .tracking-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Order Summary */
+        .order-summary {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
             gap: 15px;
         }
 
-        .track-header h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
-        .track-header p { margin: 0; opacity: 0.9; font-size: 0.95rem; }
+        .order-info h3 {
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
 
-        .est-date {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 15px;
+        .order-info p {
+            color: #666;
+            margin: 0;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-processing { background-color: #cce5ff; color: #004085; }
+        .status-shipped { background-color: #d1ecf1; color: #0c5460; }
+        .status-delivered { background-color: #d4edda; color: #155724; }
+        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+
+        /* Shipping Info */
+        .shipping-info {
+            background-color: #f8f9fa;
             border-radius: 8px;
-            text-align: right;
-        }
-        .est-date small { display: block; font-size: 0.8rem; }
-        .est-date span { font-weight: 600; font-size: 1.1rem; }
-
-        .track-body { padding: 30px; }
-
-        /* Progress Bar Horizontal */
-        .track-progress {
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 50px;
-            margin-top: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
         }
 
-        .progress-line-bg {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: #e0e0e0;
-            z-index: 1;
-        }
-
-        .progress-line-fill {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            height: 4px;
-            background-color: var(--success-green);
-            z-index: 2;
-            transition: width 0.5s ease;
-        }
-
-        .track-step {
-            position: relative;
-            z-index: 3;
-            text-align: center;
-            width: 25%;
-        }
-
-        .step-icon {
-            width: 45px;
-            height: 45px;
-            background-color: white;
-            border: 4px solid #e0e0e0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            color: #ccc;
-            font-size: 18px;
-            transition: all 0.3s;
-        }
-
-        .track-step.active .step-icon {
-            border-color: var(--primary-blue);
-            color: white;
-            background-color: var(--primary-blue);
-            box-shadow: 0 0 0 4px rgba(26, 75, 140, 0.2);
-        }
-
-        .track-step.completed .step-icon {
-            border-color: var(--success-green);
-            background-color: var(--success-green);
-            color: white;
-        }
-
-        .step-label { font-weight: 600; color: #999; font-size: 0.9rem; margin-bottom: 5px; }
-        .track-step.active .step-label { color: var(--primary-blue); }
-        .track-step.completed .step-label { color: var(--success-green); }
-        
-        .step-date { font-size: 0.8rem; color: #999; }
-
-        /* Layout Grid */
         .info-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
         }
 
-        /* Tracking History (Vertical Timeline) */
-        .history-section h4, .items-section h4 {
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: 500;
             color: var(--dark-gray);
-            font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
         }
 
-        .timeline-vertical {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            border-left: 2px solid #e0e0e0;
-            margin-left: 10px;
+        /* Timeline */
+        .timeline-section {
+            margin: 40px 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e0e0e0;
         }
 
         .timeline-item {
             position: relative;
-            padding-left: 30px;
-            padding-bottom: 25px;
+            margin-bottom: 30px;
+            padding-left: 20px;
         }
 
-        .timeline-item::before {
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item:before {
             content: '';
             position: absolute;
-            left: -6px;
-            top: 0;
-            width: 10px;
-            height: 10px;
+            left: -25px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            background-color: #ccc;
-            border: 2px solid white;
+            background-color: #ddd;
+            border: 3px solid white;
+            z-index: 2;
         }
 
-        .timeline-item:first-child::before {
+        .timeline-item.completed:before {
+            background-color: #28a745;
+        }
+
+        .timeline-item.active:before {
             background-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(26, 75, 140, 0.2);
-            width: 14px;
-            height: 14px;
-            left: -8px;
+            animation: pulse 1.5s infinite;
         }
 
-        .timeline-time {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 3px;
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(26, 75, 140, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(26, 75, 140, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(26, 75, 140, 0); }
         }
 
-        .timeline-desc {
-            font-size: 0.95rem;
-            color: var(--dark-gray);
-            line-height: 1.5;
+        .timeline-icon {
+            position: absolute;
+            left: -30px;
+            top: 0;
+            background-color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            z-index: 3;
         }
 
-        /* Right Column Info */
-        .info-card {
-            background-color: #f9f9f9;
-            padding: 20px;
+        .timeline-item.completed .timeline-icon {
+            color: #28a745;
+        }
+
+        .timeline-item.active .timeline-icon {
+            color: var(--primary-blue);
+        }
+
+        .timeline-content {
+            background-color: white;
+            border: 1px solid #e0e0e0;
             border-radius: 8px;
+            padding: 15px;
+        }
+
+        .timeline-status {
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .timeline-date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .timeline-location {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Order Items Table */
+        .order-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .order-items-table th {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .order-items-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+            border: 1px solid var(--primary-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: #153a6e;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-blue);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-logo {
+            height: 40px;
             margin-bottom: 20px;
         }
 
-        .info-label { font-size: 0.85rem; color: #666; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .info-value { font-weight: 600; color: var(--dark-gray); font-size: 1rem; }
-        
-        .product-mini {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+        .footer h5 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
         }
-        .product-mini:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        
-        .product-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 6px;
-            object-fit: cover;
-            background-color: #fff;
-            border: 1px solid #eee;
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .track-progress { flex-direction: column; gap: 20px; align-items: flex-start; margin-left: 20px; border-left: 4px solid #e0e0e0; }
-            .progress-line-bg, .progress-line-fill { display: none; }
-            .track-step { width: 100%; display: flex; align-items: center; gap: 15px; text-align: left; }
-            .step-icon { margin: 0; margin-left: -24px; z-index: 5; }
+            .search-bar {
+                max-width: 200px;
+            }
             
-            .info-grid { grid-template-columns: 1fr; }
-            .track-header { text-align: center; justify-content: center; }
-            .est-date { text-align: center; width: 100%; }
+            .nav-icon span {
+                display: none;
+            }
+            
+            .menu-container {
+                gap: 15px;
+                justify-content: space-around;
+            }
+            
+            .menu-category {
+                font-size: 14px;
+            }
+            
+            .order-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .timeline {
+                padding-left: 20px;
+            }
+            
+            .timeline:before {
+                left: 10px;
+            }
+            
+            .timeline-item:before {
+                left: -15px;
+            }
+            
+            .timeline-icon {
+                left: -20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-
+    <!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
         <a class="navbar-brand mx-2" href="index.php">
-            <img src="gambar/LOGO.png" alt="Megatek Logo">
+            <img src="uploads/LOGO.png" alt="Megatek Logo">
         </a>
-        <div class="search-bar" style="flex-grow: 1; max-width: 500px; margin: 0 auto; position: relative;">
-            <input type="text" class="form-control" placeholder="Cari pesanan..." disabled style="background-color: #f8f9fa;">
+
+        <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Cari produk, kategori, atau brand">
+            <button type="button">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
+
         <div class="nav-icons">
-            <a href="keranjang.php" class="nav-icon">
-                <i class="fas fa-shopping-cart"></i> <span>Cart</span>
+            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
+                <div style="position: relative;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge" id="cartCount">
+                        <?php 
+                        if (isLoggedIn()) {
+                            $user_id = $_SESSION['user_id'];
+                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+                            echo $cart_count;
+                        } else {
+                            echo '0';
+                        }
+                        ?>
+                    </span>
+                </div>
+                <span>Keranjang</span>
             </a>
-            <div class="user-dropdown">
-                <a href="pesanan.php" class="nav-icon active">
-                    <i class="fas fa-user"></i> <span>Akun</span>
-                </a>
+            
+            <div id="userSection">
+                <?php if (isLoggedIn()): ?>
+                    <!-- User sudah login -->
+                    <div class="user-dropdown">
+                        <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
+                            <i class="fas fa-user"></i>
+                            <span>
+                                <?php 
+                                if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
+                                    echo htmlspecialchars($_SESSION['first_name']);
+                                } else {
+                                    echo 'Akun';
+                                }
+                                ?>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <span class="dropdown-item-text">
+                                <small>Logged in as:</small><br>
+                                <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
+                            </span>
+                            <div class="dropdown-divider"></div>
+                           
+                            <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
+                
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <!-- User belum login -->
+                    <a href="javascript:void(0);" class="nav-icon" id="userLogin">
+                        <i class="fas fa-user"></i>
+                        <span>Masuk/Daftar</span>
+                    </a>
+                <?php endif; ?>
             </div>
-        </div>
+                    </div>
     </nav>
 
+    <!-- Main Menu -->
     <div class="main-menu">
         <div class="menu-container">
-            <a href="beranda.php" class="menu-category"><span>Beranda</span></a>
+            <a href="beranda.php" class="menu-category">Beranda</a>
             <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
             <a href="produk.php" class="menu-category">Produk</a>
             <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
         </div>
     </div>
 
-    <div class="track-container">
-        <a href="orders.php" class="back-link">
+    <!-- Tracking Hero Section -->
+    <section class="tracking-hero">
+        <div class="container">
+            <h1>Lacak Pesanan</h1>
+            <p>Pantau status pengiriman pesanan Anda di Megatek Industrial Persada</p>
+        </div>
+    </section>
+
+    <!-- Tracking Container -->
+    <div class="tracking-container">
+        <a href="orders.php" class="btn-back">
             <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pesanan
         </a>
 
-        <div class="track-card">
-            <div class="track-header">
-                <div>
-                    <h2>Lacak Pesanan</h2>
-                    <p>No. Pesanan: <strong>#<?php echo $order['order_number']; ?></strong></p>
+        <div class="tracking-card">
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <div class="order-info">
+                    <h3>Pesanan #<?php echo htmlspecialchars($order['order_number']); ?></h3>
+                    <p>Tanggal Pesanan: <?php echo date('d F Y, H:i', strtotime($order['created_at'])); ?></p>
                 </div>
-                
-                <?php if ($order['status'] !== 'cancelled'): ?>
-                <div class="est-date">
-                    <small>Estimasi Tiba</small>
-                    <span>
-                        <?php 
-                        // Simulasi estimasi tanggal (H+3 dari update terakhir)
-                        echo date('d M Y', strtotime($order['updated_at'] . ' + 3 days')); 
-                        ?>
+                <div class="order-status">
+                    <span class="status-badge status-<?php echo $order['status']; ?>">
+                        <?php echo $status_labels[$order['status']] ?? $order['status']; ?>
                     </span>
                 </div>
-                <?php else: ?>
-                <div class="est-date" style="background: rgba(220, 53, 69, 0.2); color: white;">
-                    <span>DIBATALKAN</span>
-                </div>
-                <?php endif; ?>
             </div>
 
-            <div class="track-body">
-                <?php if ($order['status'] !== 'cancelled'): ?>
-                    <?php 
-                        // Hitung persentase progress bar
-                        $progress_percent = 0;
-                        if ($current_status == 'pending') $progress_percent = 12; // Sedikit jalan
-                        elseif ($current_status == 'processing') $progress_percent = 38;
-                        elseif ($current_status == 'shipped') $progress_percent = 65;
-                        elseif ($current_status == 'delivered') $progress_percent = 100;
-                    ?>
-                    
-                    <div class="track-progress">
-                        <div class="progress-line-bg"></div>
-                        <div class="progress-line-fill" style="width: <?php echo $progress_percent; ?>%;"></div>
-
-                        <div class="track-step <?php echo $current_step_index >= 0 ? ($current_step_index > 0 ? 'completed' : 'active') : ''; ?>">
-                            <div class="step-icon"><i class="fas fa-clipboard-list"></i></div>
-                            <div class="step-label">Pesanan Dibuat</div>
-                            <div class="step-date"><?php echo date('d M', strtotime($order['created_at'])); ?></div>
-                        </div>
-
-                        <div class="track-step <?php echo $current_step_index >= 1 ? ($current_step_index > 1 ? 'completed' : 'active') : ''; ?>">
-                            <div class="step-icon"><i class="fas fa-box-open"></i></div>
-                            <div class="step-label">Diproses</div>
-                            <div class="step-date">
-                                <?php echo ($current_step_index >= 1) ? date('d M', strtotime($order['updated_at'])) : '-'; ?>
-                            </div>
-                        </div>
-
-                        <div class="track-step <?php echo $current_step_index >= 2 ? ($current_step_index > 2 ? 'completed' : 'active') : ''; ?>">
-                            <div class="step-icon"><i class="fas fa-shipping-fast"></i></div>
-                            <div class="step-label">Dikirim</div>
-                            <div class="step-date">
-                                <?php echo ($current_step_index >= 2) ? date('d M', strtotime($order['updated_at'])) : '-'; ?>
-                            </div>
-                        </div>
-
-                        <div class="track-step <?php echo $current_step_index >= 3 ? 'completed' : ''; ?>">
-                            <div class="step-icon"><i class="fas fa-check-circle"></i></div>
-                            <div class="step-label">Selesai</div>
-                            <div class="step-date">
-                                <?php echo ($current_step_index >= 3) ? date('d M', strtotime($order['updated_at'])) : '-'; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <div class="alert alert-danger text-center">
-                        <i class="fas fa-times-circle fa-3x mb-3"></i><br>
-                        <h4>Pesanan Dibatalkan</h4>
-                        <p>Pesanan ini telah dibatalkan pada <?php echo date('d F Y', strtotime($order['updated_at'])); ?></p>
-                    </div>
-                <?php endif; ?>
-
+            <!-- Shipping Information -->
+            <div class="shipping-info">
+                <h4>Informasi Pengiriman</h4>
                 <div class="info-grid">
-                    <div class="history-section">
-                        <h4>Riwayat Perjalanan</h4>
-                        <?php if (empty($tracking_history) && $order['status'] !== 'cancelled'): ?>
-                            <p class="text-muted">Belum ada riwayat update.</p>
-                        <?php else: ?>
-                            <ul class="timeline-vertical">
-                                <?php foreach ($tracking_history as $history): ?>
-                                    <li class="timeline-item">
-                                        <div class="timeline-time"><?php echo date('d F Y, H:i', strtotime($history['date'])); ?> WIB</div>
-                                        <div class="timeline-desc"><?php echo htmlspecialchars($history['desc']); ?></div>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php endif; ?>
-
-                        <div class="items-section mt-5">
-                            <h4>Item Pesanan (<?php echo $order['total_items']; ?>)</h4>
-                            <?php foreach ($order_items as $item): ?>
-                                <div class="product-mini">
-                                    <img src="uploads/<?php echo htmlspecialchars($item['image_url'] ?? 'img/produk-sample.png'); ?>" alt="Produk" class="product-img">
-                                    <div>
-                                        <div style="font-weight: 500;"><?php echo htmlspecialchars($item['product_name']); ?></div>
-                                        <small class="text-muted"><?php echo $item['quantity']; ?> x Rp <?php echo number_format($item['price'], 0, ',', '.'); ?></small>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                    <div class="info-item">
+                        <span class="info-label">Kurir</span>
+                        <span class="info-value">
+                            <?php echo $courier_labels[$shipping_courier] ?? $shipping_courier; ?>
+                        </span>
                     </div>
-
-                    <div class="details-section">
-                        <div class="info-card">
-                            <div class="mb-3">
-                                <div class="info-label">Jasa Pengiriman</div>
-                                <div class="info-value">
-                                    <?php echo !empty($order['courier']) ? strtoupper($order['courier']) : 'Megatek Express'; ?>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <div class="info-label">Nomor Resi</div>
-                                <div class="info-value text-primary">
-                                    <?php 
-                                    if (!empty($order['tracking_number'])) {
-                                        echo htmlspecialchars($order['tracking_number']);
-                                        echo ' <i class="far fa-copy ms-2" style="cursor:pointer; font-size:0.8em;" onclick="alert(\'Resi disalin!\')"></i>';
-                                    } else {
-                                        echo '-';
-                                    }
-                                    ?>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="info-label">Penerima</div>
-                                <div class="info-value"><?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></div>
-                            </div>
-
-                            <div class="mb-0">
-                                <div class="info-label">Alamat Pengiriman</div>
-                                <div class="info-value" style="font-size: 0.9rem; font-weight: 400;">
-                                    <?php echo htmlspecialchars($order['shipping_address']); ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <a href="contact.php" class="btn btn-outline-primary">
-                                <i class="fas fa-headset me-2"></i> Bantuan
-                            </a>
-                        </div>
+                    <div class="info-item">
+                        <span class="info-label">Nomor Resi</span>
+                        <span class="info-value"><?php echo $tracking_number; ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Alamat Pengiriman</span>
+                        <span class="info-value"><?php echo htmlspecialchars($order['shipping_address'] ?? 'Alamat belum diisi'); ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Estimasi Pengiriman</span>
+                        <span class="info-value">
+                            <?php echo date('d F Y', strtotime($estimated_delivery)); ?>
+                        </span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Tracking Timeline -->
+            <div class="timeline-section">
+                <h3 class="section-title">Status Pengiriman</h3>
+                
+                <div class="timeline">
+                    <?php 
+                    $total_steps = count($tracking_history);
+                    foreach ($tracking_history as $index => $track): 
+                        $is_last = $index === $total_steps - 1;
+                        $is_completed = !$is_last;
+                        $is_active = $is_last;
+                    ?>
+                        <div class="timeline-item <?php echo $is_completed ? 'completed' : ($is_active ? 'active' : ''); ?>">
+                            <div class="timeline-icon">
+                                <?php 
+                                $icon_map = [
+                                    'order_created' => 'fa-receipt',
+                                    'processing' => 'fa-cog',
+                                    'shipped' => 'fa-shipping-fast',
+                                    'estimated' => 'fa-calendar-check',
+                                    'delivered' => 'fa-check-circle'
+                                ];
+                                $icon = $icon_map[$track['status']] ?? 'fa-circle';
+                                ?>
+                                <i class="fas <?php echo $icon; ?>"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-status"><?php echo htmlspecialchars($track['description']); ?></div>
+                                <div class="timeline-date">
+                                    <i class="far fa-clock me-1"></i>
+                                    <?php echo date('d F Y, H:i', strtotime($track['date'])); ?>
+                                </div>
+                                <?php if (!empty($track['location'])): ?>
+                                    <div class="timeline-location">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        <?php echo htmlspecialchars($track['location']); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="order-items-section">
+                <h3 class="section-title">Produk dalam Pesanan</h3>
+                
+                <table class="order-items-table">
+                    <thead>
+                        <tr>
+                            <th>Produk</th>
+                            <th>Kuantitas</th>
+                            <th>Harga Satuan</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $total_items = 0;
+                        foreach ($order_items as $item): 
+                            $total_items += $item['quantity'];
+                        ?>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 15px;">
+                                        <div class="item-image">
+                                            <img src="uploads/<?php echo htmlspecialchars($item['image_url'] ?? 'img/produk-sample.png'); ?>" 
+                                                 alt="<?php echo htmlspecialchars($item['product_name']); ?>"
+                                                 onerror="this.src='img/produk-sample.png'">
+                                        </div>
+                                        <div class="item-name"><?php echo htmlspecialchars($item['product_name']); ?></div>
+                                    </div>
+                                </td>
+                                <td><?php echo $item['quantity']; ?></td>
+                                <td class="item-price">Rp <?php echo number_format($item['price'], 0, ',', '.'); ?></td>
+                                <td class="item-price">Rp <?php echo number_format($item['subtotal'], 0, ',', '.'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <tr>
+                            <td colspan="2" style="text-align: right; font-weight: 600;">
+                                Total Barang: <?php echo $total_items; ?>
+                            </td>
+                            <td style="text-align: right; font-weight: 600;">Total Pesanan:</td>
+                            <td class="item-price" style="font-size: 1.1rem;">
+                                Rp <?php echo number_format($order['total_amount'], 0, ',', '.'); ?>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="https://cekresi.com/?noresi=<?php echo urlencode($tracking_number); ?>" 
+                   target="_blank" 
+                   class="btn-action btn-primary">
+                    <i class="fas fa-external-link-alt"></i> Cek di Website Kurir
+                </a>
             </div>
         </div>
     </div>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="copyright text-center pt-3 pb-3 border-top">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <img src="gambar/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
+                    <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Products</h5>
+                    <ul class="footer-links">
+                        <li><a href="produk.php?category=FBR Burner">Burner Series</a></li>
+                        <li><a href="produk.php?category=Boiler">Boiler Series</a></li>
+                        <li><a href="produk.php?category=Valve & Instrumentation">Valve & Instrumentation</a></li>
+                        <li><a href="produk.php?category=Sparepart">Spare Parts</a></li>
+                        <li><a href="produk.php">All Products</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Information</h5>
+                    <ul class="footer-links">
+                        <li><a href="aboutus.php">About Us</a></li>
+                        <li><a href="contact.php">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Terms of Use</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Contact Info</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Surabaya, Indonesia</p>
+                    <p><i class="fas fa-phone me-2"></i> +62 31 1234 5678</p>
+                    <p><i class="fas fa-envelope me-2"></i> info@megatek.co.id</p>
+                </div>
+            </div>
+            <div class="copyright">
                 © Copyright 2023 PT. Megatek Industrial Persada. All rights reserved.
             </div>
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Update cart count
+        function updateCartCount() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'get_cart_count.php', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            const cartBadge = document.querySelector('.cart-badge');
+                            if (cartBadge) {
+                                cartBadge.textContent = response.count;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error updating cart count:', e);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCount();
+            
+            // Search functionality
+            const searchInput = document.querySelector('.search-bar input');
+            const searchButton = document.querySelector('.search-bar button');
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm) {
+                    window.location.href = 'produk.php?search=' + encodeURIComponent(searchTerm);
+                }
+            }
+            
+            if (searchButton) {
+                searchButton.addEventListener('click', performSearch);
+            }
+            
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+            
+            // Auto-update cart count
+            setInterval(updateCartCount, 30000);
+        });
+    </script>
 </body>
 </html>

@@ -761,7 +761,7 @@ require_once 'config/check_login.php';
 
     <nav class="navbar d-flex align-items-center">
         <a class="navbar-brand mx-2" href="beranda.php">
-            <img src="gambar/LOGO.png" alt="Megatek Logo">
+            <img src="uploads/LOGO.png" alt="Megatek Logo">
         </a>
 
         <div class="search-bar">
@@ -812,9 +812,9 @@ require_once 'config/check_login.php';
                                 <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
                             </span>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a>
+                            
                             <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                            <a class="dropdown-item" href="wishlist.php"><i class="fas fa-heart me-2"></i>Wishlist</a>
+                            
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>Logout
@@ -1003,11 +1003,13 @@ require_once 'config/check_login.php';
         </div>
     </div>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="gambar/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
+                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
+                    
                     <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
