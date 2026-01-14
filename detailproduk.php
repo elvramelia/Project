@@ -194,6 +194,23 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
             height: 40px;
         }
 
+         /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background-color: #ff4444;
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
         .search-bar {
             flex-grow: 1;
             max-width: 500px;
@@ -1120,9 +1137,9 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
 <body>
 
 <!-- Main Navbar -->
-    <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="beranda.php">
-            <img src="gambar/LOGO.png" alt="Megatek Logo">
+     <nav class="navbar d-flex align-items-center">
+        <a class="navbar-brand mx-2" href="index.php">
+            <img src="uploads/LOGO.png" alt="Megatek Logo">
         </a>
 
         <div class="search-bar">
@@ -1174,9 +1191,9 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
                                 <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
                             </span>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a>
+                           
                             <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                            <a class="dropdown-item" href="wishlist.php"><i class="fas fa-heart me-2"></i>Wishlist</a>
+                
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>Logout
@@ -1191,7 +1208,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
                     </a>
                 <?php endif; ?>
             </div>
-        </div>
+                    </div>
     </nav>
 
     <!-- Main Menu Horizontal -->

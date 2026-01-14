@@ -676,7 +676,7 @@ try {
     <!-- Main Navbar -->
     <nav class="navbar d-flex align-items-center">
         <a class="navbar-brand mx-2" href="index.php">
-            <img src="gambar/LOGO.png" alt="Megatek Logo">
+            <img src="uploads/LOGO.png" alt="Megatek Logo">
         </a>
 
         <div class="search-bar">
@@ -728,9 +728,9 @@ try {
                                 <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
                             </span>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a>
+                           
                             <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                            <a class="dropdown-item" href="wishlist.php"><i class="fas fa-heart me-2"></i>Wishlist</a>
+                
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>Logout
@@ -886,7 +886,6 @@ try {
                 
                 <div class="login-links">
                     <a id="showRegister">Register Now</a>
-                    <a href="forgot_password.php">Forgot Password?</a>
                 </div>
             </form>
         </div>
@@ -949,7 +948,8 @@ try {
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="gambar/LOGO.png" alt="Megatek Logo" class="footer-logo">
+                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
+                    
                     <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>

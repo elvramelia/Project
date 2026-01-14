@@ -73,17 +73,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Generate unique order number
     $order_number = 'ORD-' . date('Ymd') . '-' . strtoupper(uniqid());
     
+    // Combine full shipping address
+    $full_shipping_address = $shipping_address . ", " . $shipping_city . ", " . $shipping_province . " " . $shipping_postal_code;
+    
     // Start transaction
     $conn->begin_transaction();
     
     try {
-        // Insert order
+        // DEBUG: Log data before insert
+        error_log("=== ORDER DATA ===");
+        error_log("Order Number: " . $order_number);
+        error_log("User ID: " . $user_id);
+        error_log("Total Amount: " . $grand_total);
+        error_log("Shipping Address: " . $full_shipping_address);
+        error_log("Payment Method: " . $payment_method);
+        error_log("==================");
+        
+        // Insert order - PERBAIKAN DISINI
         $order_query = "INSERT INTO orders (order_number, user_id, total_amount, status, shipping_address, payment_method, payment_status) 
                         VALUES (?, ?, ?, 'pending', ?, ?, 'pending')";
         $stmt = $conn->prepare($order_query);
-        $stmt->bind_param("sidis", $order_number, $user_id, $grand_total, $shipping_address, $payment_method);
-        $stmt->execute();
+        
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
+        // Bind parameters: s i d s s
+        $stmt->bind_param("sidss", $order_number, $user_id, $grand_total, $full_shipping_address, $payment_method);
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
         $order_id = $stmt->insert_id;
+        
+        // DEBUG: Check if order was inserted
+        error_log("Order inserted successfully. Order ID: " . $order_id);
+        
+        if (!$order_id) {
+            throw new Exception("Failed to get order ID");
+        }
         
         // Insert order items and update product stock
         foreach ($cart_items as $item) {
@@ -93,24 +122,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $order_item_query = "INSERT INTO order_items (order_id, product_id, product_name, quantity, price, subtotal) 
                                  VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($order_item_query);
+            
+            if (!$stmt) {
+                throw new Exception("Order item prepare failed: " . $conn->error);
+            }
+            
             $stmt->bind_param("iisidd", $order_id, $item['product_id'], $item['name'], $item['quantity'], $item['price'], $item_subtotal);
-            $stmt->execute();
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Order item execute failed: " . $stmt->error);
+            }
             
             // Update product stock
             $update_stock_query = "UPDATE products SET stock = stock - ? WHERE id = ?";
             $stmt = $conn->prepare($update_stock_query);
+            
+            if (!$stmt) {
+                throw new Exception("Update stock prepare failed: " . $conn->error);
+            }
+            
             $stmt->bind_param("ii", $item['quantity'], $item['product_id']);
-            $stmt->execute();
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Update stock execute failed: " . $stmt->error);
+            }
         }
         
         // Clear cart
         $clear_cart_query = "DELETE FROM cart WHERE user_id = ?";
         $stmt = $conn->prepare($clear_cart_query);
+        
+        if (!$stmt) {
+            throw new Exception("Clear cart prepare failed: " . $conn->error);
+        }
+        
         $stmt->bind_param("i", $user_id);
-        $stmt->execute();
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Clear cart execute failed: " . $stmt->error);
+        }
         
         // Commit transaction
         $conn->commit();
+        
+        // DEBUG: Success log
+        error_log("Transaction completed successfully. Redirecting to order confirmation.");
         
         // Redirect to order confirmation
         header("Location: order_confirmation.php?order_id=$order_id");
@@ -119,7 +175,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Exception $e) {
         // Rollback transaction on error
         $conn->rollback();
-        $message = 'Terjadi kesalahan saat memproses pesanan. Silakan coba lagi.';
+        
+        // DEBUG: Error log
+        error_log("Transaction failed: " . $e->getMessage());
+        
+        $message = 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage();
         $message_type = 'error';
     }
 }
@@ -898,9 +958,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <!-- Main Navbar -->
-    <nav class="navbar d-flex align-items-center">
+     <nav class="navbar d-flex align-items-center">
         <a class="navbar-brand mx-2" href="index.php">
-            <img src="gambar/LOGO.png" alt="Megatek Logo">
+            <img src="uploads/LOGO.png" alt="Megatek Logo">
         </a>
 
         <div class="search-bar">
@@ -911,25 +971,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="nav-icons">
-            <a href="keranjang.php" class="nav-icon">
+            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
                 <div style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge"><?php echo $total_items; ?></span>
+                    <span class="cart-badge" id="cartCount">
+                        <?php 
+                        if (isLoggedIn()) {
+                            $user_id = $_SESSION['user_id'];
+                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+                            echo $cart_count;
+                        } else {
+                            echo '0';
+                        }
+                        ?>
+                    </span>
                 </div>
-                <span>Cart</span>
+                <span>Keranjang</span>
             </a>
             
             <div id="userSection">
                 <?php if (isLoggedIn()): ?>
+                    <!-- User sudah login -->
                     <div class="user-dropdown">
                         <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
                             <i class="fas fa-user"></i>
-                            <span><?php echo htmlspecialchars($user_data['first_name'] ?? 'Akun'); ?></span>
+                            <span>
+                                <?php 
+                                if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
+                                    echo htmlspecialchars($_SESSION['first_name']);
+                                } else {
+                                    echo 'Akun';
+                                }
+                                ?>
+                            </span>
                         </a>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <span class="dropdown-item-text">
+                                <small>Logged in as:</small><br>
+                                <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
+                            </span>
+                            <div class="dropdown-divider"></div>
+                           
+                            <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
+                
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </div>
                     </div>
+                <?php else: ?>
+                    <!-- User belum login -->
+                    <a href="javascript:void(0);" class="nav-icon" id="userLogin">
+                        <i class="fas fa-user"></i>
+                        <span>Masuk/Daftar</span>
+                    </a>
                 <?php endif; ?>
             </div>
-        </div>
+                    </div>
     </nav>
 
     <!-- Main Menu Horizontal -->
@@ -956,8 +1056,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Checkout Container -->
     <div class="checkout-container">
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'danger'; ?>">
-                <i class="fas fa-<?php echo $message_type === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
+            <div class="alert alert-<?php echo $message_type === 'error' ? 'danger' : 'success'; ?>">
+                <i class="fas fa-<?php echo $message_type === 'error' ? 'exclamation-circle' : 'check-circle'; ?>"></i>
                 <?php echo $message; ?>
             </div>
         <?php endif; ?>
@@ -1287,6 +1387,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
+            // Validate shipping address fields
+            const shippingAddress = document.getElementById('shipping_address').value;
+            const shippingCity = document.getElementById('shipping_city').value;
+            const shippingProvince = document.getElementById('shipping_province').value;
+            const shippingPostalCode = document.getElementById('shipping_postal_code').value;
+            
+            if (!shippingAddress.trim() || !shippingCity.trim() || !shippingProvince.trim() || !shippingPostalCode.trim()) {
+                e.preventDefault();
+                alert('Silakan lengkapi semua field alamat pengiriman');
+                return false;
+            }
+            
             // Disable button to prevent double submission
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
@@ -1324,6 +1436,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (currentLength > maxLength) {
                 this.value = this.value.substring(0, maxLength);
+                alert('Catatan maksimal 500 karakter');
             }
         });
 
