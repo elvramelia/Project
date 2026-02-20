@@ -133,6 +133,10 @@ switch ($order['status']) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+
+        
+
+
         :root {
             --primary-blue: #1a4b8c;
             --light-gray: #f8f9fa;
@@ -206,7 +210,13 @@ switch ($order['status']) {
 
         .nav-icon:hover {
             color: var(--primary-blue);
-        }
+            
+        /* Main Menu */
+        .main-menu {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+        }}
 
         .cart-badge {
             position: absolute;
@@ -224,13 +234,7 @@ switch ($order['status']) {
             padding: 0 4px;
         }
 
-        /* Main Menu */
-        .main-menu {
-            background-color: white;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 10px 0;
-        }
-
+    
         .menu-container {
             display: flex;
             justify-content: center;
@@ -677,6 +681,23 @@ switch ($order['status']) {
                 justify-content: center;
             }
         }
+
+        .dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    min-width: 200px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    z-index: 1000;
+    display: none;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
     </style>
 </head>
 <body>
@@ -694,7 +715,8 @@ switch ($order['status']) {
         </div>
 
         <div class="nav-icons">
-            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
+           <a href="cart.php" class="nav-icon">
+
                 <div style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-badge" id="cartCount">
@@ -973,6 +995,25 @@ switch ($order['status']) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+
+        const userDropdown = document.getElementById('userDropdown');
+const userDropdownMenu = document.getElementById('userDropdownMenu');
+
+if (userDropdown) {
+    userDropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userDropdownMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', function() {
+        userDropdownMenu.classList.remove('show');
+    });
+
+    userDropdownMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
         // Update cart count
         function updateCartCount() {
             const xhr = new XMLHttpRequest();

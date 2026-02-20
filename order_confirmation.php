@@ -202,9 +202,35 @@ $order_items = $items_result->fetch_all(MYSQLI_ASSOC);
             <div class="payment-instruction">
                 <h4><i class="fas fa-info-circle me-2"></i>Instruksi Pembayaran</h4>
                 <p>Silakan lakukan transfer ke:</p>
-                <p><strong>Bank BCA</strong><br>
-                No. Rekening: 1234567890<br>
-                Atas Nama: Megatek Industrial Persada</p>
+                <?php
+$bank = $order['bank_name'];
+
+$bank_accounts = [
+    'bca' => [
+        'name' => 'Bank BCA',
+        'account' => '1234567890'
+    ],
+    'mandiri' => [
+        'name' => 'Bank Mandiri',
+        'account' => '0987654321'
+    ],
+    'bri' => [
+        'name' => 'Bank BRI',
+        'account' => '1122334455'
+    ]
+];
+
+if (isset($bank_accounts[$bank])) {
+    $selected_bank = $bank_accounts[$bank];
+} else {
+    $selected_bank = $bank_accounts['bca']; // fallback
+}
+?>
+
+<p><strong><?php echo $selected_bank['name']; ?></strong><br>
+No. Rekening: <?php echo $selected_bank['account']; ?><br>
+Atas Nama: Megatek Industrial Persada</p>
+
                 <p><strong>Jumlah Transfer:</strong> Rp <?php echo number_format($order['total_amount'], 0, ',', '.'); ?></p>
                 <p class="text-muted">Konfirmasi pembayaran akan diproses dalam 1x24 jam setelah transfer dilakukan.</p>
             </div>

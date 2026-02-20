@@ -102,14 +102,16 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produk - Megatek Industrial Persada</title>
+    <title>Produk - Hardjadinata Karya Utama</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary-blue: #1a4b8c;
+            /* Warna Tema Baru HKU */
+            --primary-blue: #003893; 
+            --primary-red: #e30613;
             --light-gray: #f8f9fa;
             --dark-gray: #222;
         }
@@ -122,71 +124,58 @@ try {
             padding: 0;
         }
 
-        /* Top Bar */
-        .top-bar {
-            background-color: #f0f2f5;
-            padding: 5px 0;
-            font-size: 12px;
-            border-bottom: 1px solid #e0e0e0;
+        /* --- HEADER TEMA HKU --- */
+        .hku-header-top {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px 0;
         }
 
-        .top-bar-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        .top-bar-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        .top-bar-links a {
-            color: #666;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .top-bar-links a:hover {
-            color: var(--primary-blue);
-        }
-
-        .app-promo {
+        .hku-brand-section {
             display: flex;
             align-items: center;
-            gap: 5px;
-            color: var(--primary-blue);
-            font-weight: 500;
+            gap: 15px;
         }
 
-        /* Main Navbar */
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            padding: 10px 20px;
+        .hku-brand-section img {
+            height: 65px;
+            background: white;
+            border-radius: 40px;
+            padding: 4px;
         }
 
-        .navbar-brand img {
-            height: 40px;
+        .hku-brand-text h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hku-brand-text p {
+            font-size: 14px;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .hku-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 25px;
         }
 
         .search-bar {
-            flex-grow: 1;
-            max-width: 500px;
-            margin: 0 auto;
             position: relative;
+            width: 300px;
         }
 
         .search-bar input {
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            padding: 10px 45px 10px 20px;
+            border-radius: 4px;
+            border: none;
+            padding: 8px 40px 8px 15px;
             font-size: 14px;
             width: 100%;
-            background-color: #f8f9fa;
         }
 
         .search-bar button {
@@ -196,24 +185,18 @@ try {
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #666;
+            color: var(--primary-blue);
             cursor: pointer;
-        }
-
-        .nav-icons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
         }
 
         .nav-icon {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #666;
+            color: white !important;
             text-decoration: none;
             font-size: 12px;
-            min-width: 50px;
+            transition: color 0.3s;
         }
 
         .nav-icon i {
@@ -222,53 +205,50 @@ try {
         }
 
         .nav-icon:hover {
-            color: var(--primary-blue);
-            text-decoration: none;
+            color: var(--primary-red) !important;
         }
 
-        /* Main Menu Horizontal */
-        .main-menu {
+        /* Garis Merah Pemisah */
+        .hku-divider {
+            height: 5px;
+            background-color: var(--primary-red);
+            width: 100%;
+        }
+
+        /* Menu Navigasi Putih */
+        .hku-main-nav {
             background-color: white;
-            border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 10;
         }
 
-        .menu-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
+        .hku-nav-container {
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
         }
 
-        .menu-category {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 15px 0;
-            font-weight: 500;
-            color: var(--dark-gray);
+        .hku-nav-link {
+            padding: 15px 30px;
+            font-weight: 700;
+            color: var(--primary-blue);
             text-decoration: none;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
+            text-transform: uppercase;
+            border-bottom: 4px solid transparent;
             transition: all 0.3s;
+            font-size: 15px;
         }
 
-        .menu-category:hover {
-            color: var(--primary-blue);
-            border-bottom-color: var(--primary-blue);
+        .hku-nav-link:hover {
+            color: var(--primary-red);
+            background-color: #fcfcfc;
         }
 
-        .menu-category.active {
-            color: var(--primary-blue);
-            border-bottom-color: var(--primary-blue);
-        }
-
-        .menu-category i {
-            font-size: 14px;
-            margin-left: 5px;
+        .hku-nav-link.active {
+            color: var(--primary-red);
+            border-bottom-color: var(--primary-red);
+            background-color: #f9f9f9;
         }
 
         /* User dropdown */
@@ -287,6 +267,10 @@ try {
             border-radius: 8px;
             z-index: 1000;
             display: none;
+        }
+
+        .dropdown-menu.show {
+            display: block;
         }
 
         .dropdown-item {
@@ -311,8 +295,8 @@ try {
         .cart-badge {
             position: absolute;
             top: -5px;
-            right: 5px;
-            background-color: #ff4444;
+            right: -5px;
+            background-color: var(--primary-red);
             color: white;
             font-size: 10px;
             min-width: 16px;
@@ -322,20 +306,23 @@ try {
             align-items: center;
             justify-content: center;
             padding: 0 4px;
+            border: 2px solid var(--primary-blue);
         }
 
         /* Products Hero Section */
         .products-hero {
             background-color: var(--primary-blue);
             color: white;
-            padding: 40px 0;
+            padding: 50px 0;
             text-align: center;
+            border-bottom: 5px solid var(--primary-red);
         }
 
         .products-hero h1 {
             font-size: 2.2rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 10px;
+            text-transform: uppercase;
         }
 
         .products-hero p {
@@ -349,7 +336,7 @@ try {
         .products-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 30px 15px;
+            padding: 40px 15px;
         }
 
         /* Filter Section */
@@ -358,7 +345,8 @@ try {
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
         }
 
         .filter-row {
@@ -377,8 +365,8 @@ try {
         }
 
         .filter-label {
-            font-weight: 600;
-            color: var(--dark-gray);
+            font-weight: 700;
+            color: var(--primary-blue);
         }
 
         .filter-select {
@@ -405,12 +393,13 @@ try {
         }
 
         .category-tag {
-            padding: 5px 15px;
-            background-color: #f0f7ff;
+            padding: 6px 18px;
+            background-color: #f0f4f8;
             color: var(--primary-blue);
             border-radius: 20px;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 500;
             transition: all 0.3s;
             border: 1px solid transparent;
         }
@@ -422,8 +411,9 @@ try {
         }
 
         .category-tag.active {
-            background-color: var(--primary-blue);
+            background-color: var(--primary-red);
             color: white;
+            box-shadow: 0 2px 8px rgba(227, 6, 19, 0.3);
         }
 
         /* Results Info */
@@ -433,12 +423,13 @@ try {
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px solid #eee;
         }
 
         .results-count {
             font-size: 1rem;
             color: #666;
+            font-weight: 500;
         }
 
         /* Products Grid */
@@ -453,39 +444,40 @@ try {
             background-color: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
             position: relative;
             height: 100%;
             display: flex;
             flex-direction: column;
+            border: 1px solid #eee;
         }
 
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            border-color: var(--primary-blue);
         }
 
         .product-badge {
             position: absolute;
             top: 10px;
             left: 10px;
-            padding: 5px 10px;
-            background-color: #ff4444;
+            padding: 5px 12px;
             color: white;
             font-size: 11px;
-            font-weight: 600;
-            border-radius: 3px;
+            font-weight: 700;
+            border-radius: 4px;
             z-index: 1;
+            text-transform: uppercase;
         }
 
         .product-badge.featured {
-            background-color: #28a745;
+            background-color: var(--primary-blue);
         }
 
         .product-badge.popular {
-            background-color: #ffc107;
-            color: #333;
+            background-color: var(--primary-red);
         }
 
         .product-image {
@@ -502,7 +494,7 @@ try {
         }
 
         .product-card:hover .product-image img {
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
 
         .product-info {
@@ -514,14 +506,15 @@ try {
 
         .product-category {
             font-size: 12px;
-            color: #666;
+            color: #888;
             margin-bottom: 5px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
         .product-name {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.1rem;
             margin-bottom: 10px;
             color: var(--dark-gray);
@@ -531,10 +524,11 @@ try {
         .product-name a {
             color: inherit;
             text-decoration: none;
+            transition: color 0.3s;
         }
 
         .product-name a:hover {
-            color: var(--primary-blue);
+            color: var(--primary-red);
         }
 
         .product-description {
@@ -547,8 +541,8 @@ try {
 
         .product-price {
             font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary-blue);
+            font-weight: 800;
+            color: var(--primary-red);
             margin-bottom: 15px;
         }
 
@@ -558,22 +552,20 @@ try {
             margin-top: auto;
         }
 
-        .btn-detail, .btn-add-cart {
+        .btn-detail {
+            background-color: transparent;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
             padding: 8px 15px;
             border-radius: 5px;
-            font-weight: 500;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s;
             text-decoration: none;
             text-align: center;
             flex: 1;
-        }
-
-        .btn-detail {
-            background-color: transparent;
-            color: var(--primary-blue);
-            border: 1px solid var(--primary-blue);
+            text-transform: uppercase;
         }
 
         .btn-detail:hover {
@@ -583,14 +575,25 @@ try {
         }
 
         .btn-add-cart {
-            background-color: var(--primary-blue);
+            background-color: var(--primary-red);
             color: white;
-            border: 1px solid var(--primary-blue);
+            border: 2px solid var(--primary-red);
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            flex: 1;
+            text-transform: uppercase;
         }
 
         .btn-add-cart:hover {
-            background-color: #153a6e;
-            border-color: #153a6e;
+            background-color: #c00510;
+            border-color: #c00510;
+            color: white;
             text-decoration: none;
         }
 
@@ -603,39 +606,36 @@ try {
             margin-top: 40px;
         }
 
-        .page-item {
-            list-style: none;
-        }
-
         .page-link {
             display: block;
-            padding: 8px 15px;
+            padding: 8px 16px;
             background-color: white;
             border: 1px solid #ddd;
             color: var(--dark-gray);
             text-decoration: none;
             border-radius: 5px;
             transition: all 0.3s;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .page-link:hover {
             background-color: var(--primary-blue);
             color: white;
             border-color: var(--primary-blue);
-            text-decoration: none;
         }
 
         .page-item.active .page-link {
-            background-color: var(--primary-blue);
+            background-color: var(--primary-red);
             color: white;
-            border-color: var(--primary-blue);
+            border-color: var(--primary-red);
+            box-shadow: 0 2px 5px rgba(227, 6, 19, 0.3);
         }
 
         .page-item.disabled .page-link {
             background-color: #f8f9fa;
-            color: #999;
+            color: #aaa;
             cursor: not-allowed;
+            border-color: #eee;
         }
 
         /* Empty State */
@@ -644,26 +644,24 @@ try {
             padding: 60px 20px;
             background-color: white;
             border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
         }
 
         .empty-state i {
-            font-size: 3rem;
-            color: #ddd;
+            font-size: 4rem;
+            color: var(--primary-blue);
+            opacity: 0.3;
             margin-bottom: 20px;
         }
 
         .empty-state h3 {
-            color: #666;
+            color: var(--primary-blue);
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
-        .empty-state p {
-            color: #999;
-            margin-bottom: 20px;
-        }
-
-        /* Modal Styles */
+        /* Modal & Form Styles */
         .login-modal, .register-modal {
             display: none;
             position: fixed;
@@ -671,7 +669,7 @@ try {
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 34, 85, 0.7);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -683,52 +681,10 @@ try {
             width: 90%;
             max-width: 450px;
             padding: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .login-header h3 {
-            color: var(--primary-blue);
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark-gray);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-blue);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(26, 75, 140, 0.2);
         }
 
         .btn-login, .btn-register {
@@ -744,62 +700,38 @@ try {
         }
 
         .btn-login:hover, .btn-register:hover {
-            background-color: #153a6e;
-        }
-
-        .login-links, .register-links {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-
-        .login-links a, .register-links a {
-            color: var(--primary-blue);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .login-links a:hover, .register-links a:hover {
-            text-decoration: underline;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #666;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .name-row {
-            display: flex;
-            gap: 15px;
-        }
-
-        .name-row .form-group {
-            flex: 1;
+            background-color: #002266;
         }
 
         /* Footer */
         .footer {
-            background-color: #1a1a1a;
+            background-color: #001f55;
             color: white;
             padding: 60px 0 30px;
             margin-top: 60px;
+            border-top: 5px solid var(--primary-red);
         }
 
-        .footer-logo {
-            height: 40px;
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             margin-bottom: 20px;
+        }
+        
+        .footer-logo-img {
+            height: 55px;
+            background-color: white;
+            border-radius: 30px;
+            padding: 3px;
+        }
+
+        .footer-brand-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
         }
 
         .footer h5 {
@@ -809,30 +741,16 @@ try {
             font-size: 1.1rem;
         }
 
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #aaa;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a { color: #ccc; text-decoration: none; transition: color 0.3s; }
+        .footer-links a:hover { color: white; }
 
         .social-icons a {
             display: inline-block;
             width: 36px;
             height: 36px;
-            background: #333;
+            background: rgba(255,255,255,0.1);
             color: white;
             border-radius: 50%;
             text-align: center;
@@ -842,189 +760,121 @@ try {
         }
 
         .social-icons a:hover {
-            background: var(--primary-blue);
+            background: var(--primary-red);
         }
 
         .copyright {
             text-align: center;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #333;
+            border-top: 1px solid rgba(255,255,255,0.1);
             color: #aaa;
             font-size: 14px;
         }
 
         /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .hku-header-actions { display: none; }
+            .hku-brand-text h1 { font-size: 20px; }
+            .hku-nav-link { padding: 10px 15px; font-size: 13px; }
+        }
         @media (max-width: 768px) {
-            .top-bar {
-                display: none;
-            }
-            
-            .main-menu {
-                display: none;
-            }
-            
-            .search-bar {
-                max-width: 200px;
-            }
-            
-            .nav-icon span {
-                display: none;
-            }
-            
-            .nav-icon {
-                min-width: auto;
-            }
-            
-            .filter-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 15px;
-            }
-            
-            .product-card {
-                margin-bottom: 0;
-            }
-            
-            .product-actions {
-                flex-direction: column;
-            }
-            
-            .btn-detail, .btn-add-cart {
-                width: 100%;
-            }
+            .filter-row { flex-direction: column; align-items: flex-start; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+            .product-actions { flex-direction: column; }
+            .btn-detail, .btn-add-cart { width: 100%; }
         }
-
         @media (max-width: 576px) {
-            .nav-icons {
-                gap: 10px;
-            }
-            
-            .search-bar {
-                max-width: 150px;
-            }
-            
-            .navbar-brand img {
-                height: 30px;
-            }
-            
-            .products-hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .pagination {
-                flex-wrap: wrap;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .filter-group {
-                flex-direction: column;
-                align-items: flex-start;
-                width: 100%;
-            }
-            
-            .filter-select {
-                width: 100%;
-            }
+            .hku-brand-section img { height: 45px; }
+            .hku-brand-text h1 { font-size: 16px; }
+            .hku-nav-container { flex-direction: column; width: 100%; }
+            .hku-nav-link { width: 100%; text-align: center; border-bottom: 1px solid #eee; }
+            .hku-nav-link.active { border-left: 4px solid var(--primary-red); border-bottom: none; }
+            .products-hero h1 { font-size: 1.8rem; }
+            .products-grid { grid-template-columns: 1fr; }
+            .pagination { flex-wrap: wrap; }
         }
     </style>
 </head>
-  <!-- Main Navbar -->
-    <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="index.php">
-            <img src="uploads/LOGO.png" alt="Megatek Logo">
-        </a>
+<body>
 
-        <div class="search-bar">
-            <input type="text" class="form-control" placeholder="Cari produk, kategori, atau brand">
-            <button type="button">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-
-        <div class="nav-icons">
-            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
-                <div style="position: relative;">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge" id="cartCount">
-                        <?php 
-                        if (isLoggedIn()) {
-                            $user_id = $_SESSION['user_id'];
-                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
-                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
-                            echo $cart_count;
-                        } else {
-                            echo '0';
-                        }
-                        ?>
-                    </span>
+    <header class="hku-header-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="hku-brand-section">
+                <img src="uploads/logoHKU.png" alt="HKU Logo">
+                <div class="hku-brand-text">
+                    <h1>HARDJADINATA KARYA UTAMA</h1>
+                    <p>Your Trusted Partner in Industrial Spareparts</p>
                 </div>
-                <span>Keranjang</span>
-            </a>
-            
-            <div id="userSection">
-                <?php if (isLoggedIn()): ?>
-                    <!-- User sudah login -->
-                    <div class="user-dropdown">
-                        <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
-                            <i class="fas fa-user"></i>
-                            <span>
-                                <?php 
-                                if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
-                                    echo htmlspecialchars($_SESSION['first_name']);
-                                } else {
-                                    echo 'Akun';
-                                }
-                                ?>
-                            </span>
-                        </a>
-                        <div class="dropdown-menu" id="userDropdownMenu">
-                            <span class="dropdown-item-text">
-                                <small>Logged in as:</small><br>
-                                <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
-                            </span>
-                            <div class="dropdown-divider"></div>
-                           
-                            <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="logout.php">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <!-- User belum login -->
-                    <a href="javascript:void(0);" class="nav-icon" id="userLogin">
-                        <i class="fas fa-user"></i>
-                        <span>Masuk/Daftar</span>
-                    </a>
-                <?php endif; ?>
             </div>
+
+            <div class="hku-header-actions">
+                <div class="search-bar">
+                    <input type="text" placeholder="Cari produk, kategori, atau brand">
+                    <button type="button"><i class="fas fa-search"></i></button>
+                </div>
+
+                <a href="javascript:void(0);" class="nav-icon" id="cartLink">
+                    <div style="position: relative;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge" id="cartCount">
+                            <?php 
+                            if (isLoggedIn()) {
+                                $user_id = $_SESSION['user_id'];
+                                $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+                                $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+                                echo $cart_count;
+                            } else {
+                                echo '0';
+                            }
+                            ?>
+                        </span>
                     </div>
-    </nav>
-<!-- Main Menu Horizontal -->
-    <div class="main-menu">
-        <div class="menu-container">
-           <a href="beranda.php" class="menu-category">Beranda</a>
-            <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
-            <a href="produk.php" class="menu-category">Produk</a>
-            <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
-           
+                    <span class="mt-1">Keranjang</span>
+                </a>
+                
+                <div id="userSection">
+                    <?php if (isLoggedIn()): ?>
+                        <div class="user-dropdown" style="position: relative;">
+                            <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
+                                <i class="fas fa-user"></i>
+                                <span class="mt-1">
+                                    <?php echo isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : 'Akun'; ?>
+                                </span>
+                            </a>
+                            <div class="dropdown-menu" id="userDropdownMenu">
+                                <span class="dropdown-item-text">
+                                    <small>Logged in as:</small><br>
+                                    <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
+                                </span>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <a href="javascript:void(0);" class="nav-icon" id="userLogin">
+                            <i class="fas fa-user"></i>
+                            <span class="mt-1">Masuk/Daftar</span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
-    </div>
+    </header>
 
+    <div class="hku-divider"></div>
 
-    <!-- Products Hero Section -->
+    <nav class="hku-main-nav">
+        <div class="container hku-nav-container">
+            <a href="beranda.php" class="hku-nav-link">BERANDA</a>
+            <a href="tentangkami.php" class="hku-nav-link">TENTANG KAMI</a>
+            <a href="produk.php" class="hku-nav-link active">PRODUK</a>
+            <a href="hubungikami.php" class="hku-nav-link">HUBUNGI KAMI</a>
+        </div>
+    </nav>
+
     <section class="products-hero">
         <div class="container">
             <h1>
@@ -1056,15 +906,12 @@ try {
         </div>
     </section>
 
-    <!-- Products Container -->
     <div class="products-container">
-        <!-- Filter Section -->
         <div class="filter-section">
             <div class="filter-row">
                 <div class="filter-group">
-                    <span class="filter-label">Filter:</span>
-                   <select class="filter-select" id="categoryFilter"onchange="if(this.value) window.location.href='produk.php?category=' + encodeURIComponent(this.value)">
-
+                    <span class="filter-label"><i class="fas fa-filter me-1"></i> Filter:</span>
+                    <select class="filter-select" id="categoryFilter" onchange="if(this.value !== '') { window.location.href='produk.php?category=' + encodeURIComponent(this.value) } else { window.location.href='produk.php' }">
                         <option value="">Semua Kategori</option>
                         <option value="FBR Burner" <?php echo $category == 'FBR Burner' ? 'selected' : ''; ?>>FBR Burner</option>
                         <option value="Boiler" <?php echo $category == 'Boiler' ? 'selected' : ''; ?>>Boiler</option>
@@ -1072,7 +919,7 @@ try {
                         <option value="Sparepart" <?php echo $category == 'Sparepart' ? 'selected' : ''; ?>>Spare Part</option>
                     </select>
                     
-                    <span class="filter-label">Urutkan:</span>
+                    <span class="filter-label ms-md-3"><i class="fas fa-sort me-1"></i> Urutkan:</span>
                     <select class="filter-select" id="sortFilter" onchange="updateSort(this.value)">
                         <option value="newest" <?php echo $sort == 'newest' ? 'selected' : ''; ?>>Terbaru</option>
                         <option value="price_low" <?php echo $sort == 'price_low' ? 'selected' : ''; ?>>Harga: Rendah ke Tinggi</option>
@@ -1081,7 +928,7 @@ try {
                     </select>
                 </div>
                 
-                <a href="produk.php" class="btn-detail" style="padding: 8px 20px; text-decoration: none;">
+                <a href="produk.php" class="btn-detail" style="flex: 0 1 auto; max-width: 150px; border-color: var(--primary-red); color: var(--primary-red);">
                     <i class="fas fa-redo"></i> Reset Filter
                 </a>
             </div>
@@ -1089,38 +936,36 @@ try {
             <?php if (!$category && !$search && !$featured && !$popular): ?>
             <div class="category-tags">
                 <a href="produk.php?featured=1" class="category-tag <?php echo $featured ? 'active' : ''; ?>">
-                    <i class="fas fa-star"></i> Unggulan
+                    <i class="fas fa-star me-1"></i> Unggulan
                 </a>
                 <a href="produk.php?popular=1" class="category-tag <?php echo $popular ? 'active' : ''; ?>">
-                    <i class="fas fa-fire"></i> Populer
+                    <i class="fas fa-fire me-1"></i> Populer
                 </a>
                 <a href="produk.php?category=FBR Burner" class="category-tag">
-                    <i class="fas fa-fire"></i> FBR Burner
+                    <i class="fas fa-fire me-1"></i> FBR Burner
                 </a>
                 <a href="produk.php?category=Boiler" class="category-tag">
-                    <i class="fas fa-industry"></i> Boiler
+                    <i class="fas fa-industry me-1"></i> Boiler
                 </a>
                 <a href="produk.php?category=<?php echo urlencode('Valve & Instrumentation'); ?>" class="category-tag">
-                    <i class="fas fa-gauge-high"></i> Valve & Instrumentation
+                    <i class="fas fa-gauge-high me-1"></i> Valve & Inst.
                 </a>
                 <a href="produk.php?category=Sparepart" class="category-tag">
-                    <i class="fas fa-gear"></i> Spare Part
+                    <i class="fas fa-gear me-1"></i> Spare Part
                 </a>
             </div>
             <?php endif; ?>
         </div>
         
-        <!-- Results Info -->
         <div class="results-info">
             <div class="results-count">
-                Menampilkan <?php echo count($products); ?> dari <?php echo $total_products; ?> produk
+                Menampilkan <strong><?php echo count($products); ?></strong> dari <strong><?php echo $total_products; ?></strong> produk
                 <?php if ($search): ?>
-                    untuk "<strong><?php echo htmlspecialchars($search); ?></strong>"
+                    untuk "<strong><span style="color: var(--primary-red);"><?php echo htmlspecialchars($search); ?></span></strong>"
                 <?php endif; ?>
             </div>
         </div>
         
-        <!-- Products Grid -->
         <?php if (!empty($products)): ?>
             <div class="products-grid">
                 <?php foreach ($products as $product): ?>
@@ -1132,9 +977,7 @@ try {
                         <?php endif; ?>
                         
                         <div class="product-image">
-                            <img src="uploads/<?php echo htmlspecialchars($product['image_url']); ?>" 
-                            alt="<?php echo htmlspecialchars($product['name']); ?>">
-
+                            <img src="uploads/<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                         </div>
                         
                         <div class="product-info">
@@ -1142,7 +985,7 @@ try {
                             <h3 class="product-name">
                                 <a href="detailproduk.php?id=<?php echo $product['id']; ?>"><?php echo htmlspecialchars($product['name']); ?></a>
                             </h3>
-                            <p class="product-description"><?php echo mb_strimwidth(htmlspecialchars($product['description']), 0, 100, '...'); ?></p>
+                            <p class="product-description"><?php echo mb_strimwidth(htmlspecialchars($product['description']), 0, 90, '...'); ?></p>
                             
                             <div class="product-price">Rp <?php echo number_format($product['price'], 0, ',', '.'); ?></div>
                             
@@ -1157,7 +1000,6 @@ try {
                 <?php endforeach; ?>
             </div>
             
-            <!-- Pagination -->
             <?php if ($total_pages > 1): ?>
                 <ul class="pagination">
                     <?php if ($page > 1): ?>
@@ -1218,140 +1060,123 @@ try {
     }
     ?>
 
-    <!-- Login Modal -->
     <div class="login-modal" id="loginModal">
         <div class="login-content">
-            <button class="close-btn" id="closeLogin">&times;</button>
-            <div class="login-header">
-                <h3>Megatek Industrial Persada</h3>
-                <p>Surabaya</p>
+            <button class="close-btn" id="closeLogin" style="position: absolute; top: 15px; right: 15px; border: none; background: transparent; font-size: 20px;">&times;</button>
+            <div class="text-center mb-4">
+                <h3 style="color: var(--primary-blue); font-weight: 700;">HKU</h3>
+                <p class="text-muted">Surabaya</p>
             </div>
             
             <?php if (isset($_GET['login_required'])): ?>
-                <div class="alert alert-info">
-                    Please login to continue to cart
-                </div>
+                <div class="alert alert-info">Please login to continue to cart</div>
             <?php endif; ?>
             
-            <h5 class="mb-4 text-center">SIGN IN TO YOUR ACCOUNT</h5>
+            <h5 class="mb-4 text-center">SIGN IN</h5>
             
             <form id="loginForm" method="POST">
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="example@gmail.com" required>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Type Password" required>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
                 </div>
-                
                 <button type="submit" class="btn-login">LOGIN</button>
-                
-                <div class="login-links">
-                    <a id="showRegister">Register Now</a>
-                    <a href="forgot_password.php">Forgot Password?</a>
+                <div class="d-flex justify-content-between mt-3" style="font-size: 14px;">
+                    <a id="showRegister" style="color: var(--primary-blue); cursor: pointer;">Register Now</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Register Modal -->
     <div class="register-modal" id="registerModal">
         <div class="register-content">
-            <button class="close-btn" id="closeRegister">&times;</button>
-            <div class="login-header">
-                <h3>Megatek Industrial Persada</h3>
-                <p>Surabaya</p>
+            <button class="close-btn" id="closeRegister" style="position: absolute; top: 15px; right: 15px; border: none; background: transparent; font-size: 20px;">&times;</button>
+            <div class="text-center mb-4">
+                <h3 style="color: var(--primary-blue); font-weight: 700;">HKU</h3>
+                <p class="text-muted">Surabaya</p>
             </div>
-            
-            <h5 class="mb-4 text-center">CREATE NEW ACCOUNT</h5>
-            
+            <h5 class="mb-4 text-center">CREATE ACCOUNT</h5>
             <form id="registerForm" method="POST">
-                <div class="name-row">
-                    <div class="form-group">
-                        <label for="first_name">First Name</label>
-                        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                <div class="d-flex gap-3 mb-3">
+                    <div class="w-50">
+                        <label class="form-label fw-bold">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
                     </div>
-                    <div class="form-group">
-                        <label for="last_name">Last Name</label>
-                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                    <div class="w-50">
+                        <label class="form-label fw-bold">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="reg_email">Email address</label>
-                    <input type="email" class="form-control" id="reg_email" name="email" placeholder="example@gmail.com" required>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email</label>
+                    <input type="email" class="form-control" id="reg_email" name="email" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="phone_number">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone_number" name="phone_number" placeholder="Phone Number" required>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Phone</label>
+                    <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="reg_password">Password</label>
-                    <input type="password" class="form-control" id="reg_password" name="password" placeholder="Create Password" required>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Password</label>
+                    <input type="password" class="form-control" id="reg_password" name="password" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="confirm_password">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                 </div>
-                
                 <button type="submit" class="btn-register">REGISTER</button>
-                
-                <div class="register-links">
-                    <a id="showLogin">Already have an account? Sign In</a>
+                <div class="mt-3 text-center" style="font-size: 14px;">
+                    <a id="showLogin" style="color: var(--primary-blue); cursor: pointer;">Already have an account? Sign In</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
-                    
-                    <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
-                    <div class="social-icons">
+                    <div class="footer-brand">
+                        <img src="uploads/logoHKU.png" alt="HKU Logo" class="footer-logo-img">
+                        <span class="footer-brand-title">Hardjadinata<br>Karya Utama</span>
+                    </div>
+                    <p>PT. Hardjadinata Karya Utama - Your trusted partner for industrial spareparts solutions.</p>
+                    <div class="social-icons mt-3">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Products</h5>
+                    <h5>Produk Kami</h5>
                     <ul class="footer-links">
                         <li><a href="produk.php?category=FBR Burner">Burner Series</a></li>
                         <li><a href="produk.php?category=Boiler">Boiler Series</a></li>
                         <li><a href="produk.php?category=Valve & Instrumentation">Valve & Instrumentation</a></li>
                         <li><a href="produk.php?category=Sparepart">Spare Parts</a></li>
-                        <li><a href="produk.php">All Products</a></li>
+                        <li><a href="produk.php">Semua Produk</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Information</h5>
+                    <h5>Informasi</h5>
                     <ul class="footer-links">
-                        <li><a href="aboutus.php">About Us</a></li>
-                        <li><a href="contact.php">Contact Us</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Terms of Use</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="aboutus.php">Tentang Kami</a></li>
+                        <li><a href="contact.php">Hubungi Kami</a></li>
+                        <li><a href="#">Syarat & Ketentuan</a></li>
+                        <li><a href="#">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Contact Info</h5>
+                    <h5>Kontak Info</h5>
                     <p><i class="fas fa-map-marker-alt me-2"></i> Surabaya, Indonesia</p>
                     <p><i class="fas fa-phone me-2"></i> +62 31 1234 5678</p>
-                    <p><i class="fas fa-envelope me-2"></i> info@megatek.co.id</p>
+                    <p><i class="fas fa-envelope me-2"></i> info@hku.co.id</p>
                 </div>
             </div>
             <div class="copyright">
-                © Copyright 2023 PT. Megatek Industrial Persada. All rights reserved.
+                © Copyright 2026 PT. Hardjadinata Karya Utama. All rights reserved.
             </div>
         </div>
     </footer>
@@ -1359,51 +1184,52 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Modal functionality
+        // Modal & Auth Logic
         const userLogin = document.getElementById('userLogin');
         const loginModal = document.getElementById('loginModal');
         const registerModal = document.getElementById('registerModal');
         const closeLogin = document.getElementById('closeLogin');
         const closeRegister = document.getElementById('closeRegister');
-        const showRegister = document.getElementById('showRegister');
-        const showLogin = document.getElementById('showLogin');
         
-        if (userLogin) {
-            userLogin.addEventListener('click', function() {
-                loginModal.style.display = 'flex';
-            });
-        }
+        if (userLogin) userLogin.addEventListener('click', () => loginModal.style.display = 'flex');
+        closeLogin.addEventListener('click', () => loginModal.style.display = 'none');
+        closeRegister.addEventListener('click', () => registerModal.style.display = 'none');
         
-        closeLogin.addEventListener('click', function() {
+        document.getElementById('showRegister').addEventListener('click', () => {
             loginModal.style.display = 'none';
+            registerModal.style.display = 'flex';
         });
-        
-        closeRegister.addEventListener('click', function() {
+        document.getElementById('showLogin').addEventListener('click', () => {
             registerModal.style.display = 'none';
+            loginModal.style.display = 'flex';
         });
         
-        if (showRegister) {
-            showRegister.addEventListener('click', function() {
-                loginModal.style.display = 'none';
-                registerModal.style.display = 'flex';
-            });
-        }
-        
-        if (showLogin) {
-            showLogin.addEventListener('click', function() {
-                registerModal.style.display = 'none';
-                loginModal.style.display = 'flex';
-            });
-        }
-        
-        window.addEventListener('click', function(event) {
-            if (event.target === loginModal) {
-                loginModal.style.display = 'none';
-            }
-            if (event.target === registerModal) {
-                registerModal.style.display = 'none';
-            }
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) loginModal.style.display = 'none';
+            if (e.target === registerModal) registerModal.style.display = 'none';
         });
+
+        // Dropdown menu
+        const userDropdown = document.getElementById('userDropdown');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        if (userDropdown) {
+            userDropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdownMenu.classList.toggle('show');
+            });
+            document.addEventListener('click', () => userDropdownMenu.classList.remove('show'));
+            userDropdownMenu.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        // Search logic
+        const searchInput = document.querySelector('.search-bar input');
+        const searchButton = document.querySelector('.search-bar button');
+        const executeSearch = () => {
+            const term = searchInput.value.trim();
+            if (term !== '') window.location.href = 'produk.php?search=' + encodeURIComponent(term);
+        };
+        searchButton.addEventListener('click', executeSearch);
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeSearch(); });
 
         // Update sort parameter
         function updateSort(sortValue) {
@@ -1453,42 +1279,14 @@ try {
         // Cart link click handler
         document.getElementById('cartLink').addEventListener('click', function(e) {
             e.preventDefault();
-            
             <?php if (isLoggedIn()): ?>
-                // User is logged in, redirect to cart
                 window.location.href = 'cart.php';
             <?php else: ?>
-                // User is not logged in, show login modal
                 loginModal.style.display = 'flex';
             <?php endif; ?>
         });
 
-        // Dropdown menu functionality for logged in user
-        const userDropdown = document.getElementById('userDropdown');
-        const userDropdownMenu = document.getElementById('userDropdownMenu');
-
-        if (userDropdown) {
-            userDropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-                userDropdownMenu.style.display = userDropdownMenu.style.display === 'block' ? 'none' : 'block';
-            });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function() {
-                if (userDropdownMenu) {
-                    userDropdownMenu.style.display = 'none';
-                }
-            });
-            
-            // Prevent dropdown from closing when clicking inside
-            if (userDropdownMenu) {
-                userDropdownMenu.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-        }
-
-        // Update cart count periodically
+        // Update Cart Count
         function updateCartCount() {
             <?php if (isLoggedIn()): ?>
                 const xhr = new XMLHttpRequest();
@@ -1496,42 +1294,17 @@ try {
                 xhr.onload = function() {
                     if (xhr.status === 200) {
                         try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                document.getElementById('cartCount').textContent = response.count;
-                            }
-                        } catch (e) {
-                            console.error('Error updating cart count:', e);
-                        }
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.success) document.getElementById('cartCount').textContent = res.count;
+                        } catch (e) {}
                     }
                 };
                 xhr.send();
             <?php endif; ?>
         }
 
-        // Set active menu based on current filters
-        function setActiveMenu() {
-            const menuItems = document.querySelectorAll('.menu-category');
-            const currentPage = 'produk.php';
-            
-            <?php if ($category): ?>
-                menuItems.forEach(item => {
-                    if (item.textContent.includes('<?php echo $category; ?>') || 
-                        item.getAttribute('href')?.includes('category=<?php echo urlencode($category); ?>')) {
-                        item.classList.add('active');
-                    }
-                });
-            <?php endif; ?>
-        }
-
-        // Update cart count every 30 seconds
         setInterval(updateCartCount, 30000);
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCartCount();
-            setActiveMenu();
-        });
+        document.addEventListener('DOMContentLoaded', updateCartCount);
     </script>
 </body>
 </html>

@@ -1059,6 +1059,26 @@ if ($filter !== 'all') {
                 height: 80px;
             }
         }
+
+         /* User dropdown */
+      .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            min-width: 200px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            display: none;
+        }
+
+.dropdown-menu.show {
+    display: block;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -1077,7 +1097,8 @@ if ($filter !== 'all') {
         </div>
 
         <div class="nav-icons">
-            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
+           <a href="cart.php" class="nav-icon">
+
                 <div style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-badge" id="cartCount">
@@ -1398,7 +1419,7 @@ if ($filter !== 'all') {
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="gambar/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
+                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
                     <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -1443,6 +1464,25 @@ if ($filter !== 'all') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+
+        const userDropdown = document.getElementById('userDropdown');
+const userDropdownMenu = document.getElementById('userDropdownMenu');
+
+if (userDropdown) {
+    userDropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userDropdownMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', function() {
+        userDropdownMenu.classList.remove('show');
+    });
+
+    userDropdownMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
         
         // Search functionality
         const searchInput = document.getElementById('searchOrders');

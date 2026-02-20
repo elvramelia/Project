@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $shipping_province = $conn->real_escape_string(trim($_POST['shipping_province']));
     $shipping_postal_code = $conn->real_escape_string(trim($_POST['shipping_postal_code']));
     $payment_method = $conn->real_escape_string($_POST['payment_method']);
+    $bank_name = isset($_POST['bank_option']) ? $conn->real_escape_string($_POST['bank_option']) : null;
     $notes = $conn->real_escape_string(trim($_POST['notes']));
     
     // Generate unique order number
@@ -90,8 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log("==================");
         
         // Insert order - PERBAIKAN DISINI
-        $order_query = "INSERT INTO orders (order_number, user_id, total_amount, status, shipping_address, payment_method, payment_status) 
-                        VALUES (?, ?, ?, 'pending', ?, ?, 'pending')";
+        $order_query = "INSERT INTO orders (order_number, user_id, total_amount, status, shipping_address, payment_method, bank_name, payment_status) 
+                VALUES (?, ?, ?, 'pending', ?, ?, ?, 'pending')";
+
         $stmt = $conn->prepare($order_query);
         
         if (!$stmt) {
@@ -99,7 +101,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Bind parameters: s i d s s
-        $stmt->bind_param("sidss", $order_number, $user_id, $grand_total, $full_shipping_address, $payment_method);
+       $stmt->bind_param("sidsss", 
+    $order_number, 
+    $user_id, 
+    $grand_total, 
+    $full_shipping_address, 
+    $payment_method,
+    $bank_name
+);
+
         
         if (!$stmt->execute()) {
             throw new Exception("Execute failed: " . $stmt->error);
@@ -355,6 +365,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .menu-category i {
             font-size: 14px;
             margin-left: 5px;
+        }
+
+         /* User dropdown */
+      .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            min-width: 200px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            display: none;
+        }
+
+.dropdown-menu.show {
+    display: block;
+}
+
+
+         /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background-color: #ff4444;
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
         }
 
         /* Checkout Hero Section */
@@ -954,6 +999,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 align-items: flex-start;
             }
         }
+
+        .bank-option input[type="radio"] {
+    margin-right: 10px;
+}
+
+.bank-option input[type="radio"]:checked ~ .bank-info {
+    font-weight: 600;
+}
+
+.bank-option input[type="radio"]:checked {
+    accent-color: var(--primary-blue);
+}
+
+.bank-option input[type="radio"]:checked {
+    accent-color: var(--primary-blue);
+}
+
+.bank-option input[type="radio"]:checked + .bank-logo,
+.bank-option input[type="radio"]:checked ~ .bank-info {
+    color: var(--primary-blue);
+}
+.bank-option:has(input:checked) {
+    border-color: var(--primary-blue);
+    background-color: #f0f7ff;
+}
+
     </style>
 </head>
 <body>
@@ -971,7 +1042,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="nav-icons">
-            <a href="javascript:void(0);" class="nav-icon" id="cartLink">
+          <a href="cart.php" class="nav-icon">
+
                 <div style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-badge" id="cartCount">
@@ -1041,7 +1113,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
             <a href="produk.php" class="menu-category">Produk</a>
             <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
-            <a href="promo.php" class="menu-category">Promo</a>
         </div>
     </div>
 
@@ -1163,30 +1234,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                 </label>
                                 <div class="payment-banks" id="bankOptions">
-                                    <div class="bank-option">
-                                        <input type="radio" id="bank_bca" name="bank_option" value="bca">
-                                        <img src="https://upload.wikimedia.org/wikipedia/id/thumb/5/5c/Bank_Central_Asia.svg/2560px-Bank_Central_Asia.svg.png" alt="BCA" class="bank-logo">
-                                        <div class="bank-info">
-                                            <h5>Bank Central Asia (BCA)</h5>
-                                            <p>1234567890 - Megatek Industrial Persada</p>
-                                        </div>
+                                   <label class="bank-option" for="bank_bca">
+                                    <input type="radio" id="bank_bca" name="bank_option" value="bca">
+                                    <img src="uploads/logobankbca.jpeg" class="bank-logo">
+                                    <div class="bank-info">
+                                        <h5>Bank Central Asia (BCA)</h5>
+                                        <p>1234567890 - Megatek Industrial Persada</p>
                                     </div>
-                                    <div class="bank-option">
-                                        <input type="radio" id="bank_mandiri" name="bank_option" value="mandiri">
-                                        <img src="https://upload.wikimedia.org/wikipedia/id/thumb/a/ad/Bank_Mandiri_logo_2016.svg/2560px-Bank_Mandiri_logo_2016.svg.png" alt="Mandiri" class="bank-logo">
-                                        <div class="bank-info">
-                                            <h5>Bank Mandiri</h5>
-                                            <p>0987654321 - Megatek Industrial Persada</p>
-                                        </div>
-                                    </div>
-                                    <div class="bank-option">
-                                        <input type="radio" id="bank_bri" name="bank_option" value="bri">
-                                        <img src="https://upload.wikimedia.org/wikipedia/id/thumb/5/5c/BRI_2020.svg/2560px-BRI_2020.svg.png" alt="BRI" class="bank-logo">
-                                        <div class="bank-info">
-                                            <h5>Bank Rakyat Indonesia (BRI)</h5>
-                                            <p>1122334455 - Megatek Industrial Persada</p>
-                                        </div>
-                                    </div>
+                                </label>
+
+                                     <label class="bank-option" for="bank_mandiri">
+                                       <input type="radio" id="bank_mandiri" name="bank_option" value="mandiri">
+                                       <img src="uploads/logobankmandiri.png" class="bank-logo">
+                                           <div class="bank-info">
+                                                  <h5>Bank Mandiri</h5>
+                                                   <p>0987654321 - Megatek Industrial Persada</p>
+                                           </div>
+                                     </label>
+
+                                     <label class="bank-option" for="bank_bri">
+                                     <input type="radio" id="bank_bri" name="bank_option" value="bri">
+                                      <img src="uploads/logobankbri.png" class="bank-logo">
+                                            <div class="bank-info">
+                                                <h5>Bank Rakyat Indonesia (BRI)</h5>
+                                              <p>1122334455 - Megatek Industrial Persada</p>
+                                            </div>
+                                     </label>
                                 </div>
                             </div>
 
@@ -1255,7 +1328,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php foreach ($cart_items as $item): ?>
                         <div class="product-item">
                             <div class="product-img">
-                                <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                                <img src="uploads/<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
                             </div>
                             <div class="product-info">
                                 <div class="product-name"><?php echo htmlspecialchars($item['name']); ?></div>
@@ -1295,12 +1368,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <!-- Footer -->
+     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="gambar/LOGO-white.png" alt="Megatek Logo" class="footer-logo">
+                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
+                    
                     <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -1345,6 +1419,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+
+         // Dropdown menu functionality for logged in user
+        const userDropdown = document.getElementById('userDropdown');
+const userDropdownMenu = document.getElementById('userDropdownMenu');
+
+if (userDropdown) {
+    userDropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userDropdownMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', function() {
+        userDropdownMenu.classList.remove('show');
+    });
+
+    userDropdownMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
         // Payment method selection
         const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
         const bankOptions = document.getElementById('bankOptions');
