@@ -129,6 +129,22 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     
     <style>
+         /* ===== STICKY HEADER FIX ===== */
+.sticky-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+}
+
+.hku-header-top {
+    position: relative;
+    z-index: 9999;
+}
+
+.hku-main-nav {
+    position: relative;
+    z-index: 9998;
+}
         :root {
             /* Warna Tema Baru HKU */
             --primary-blue: #003893; 
@@ -869,7 +885,7 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
     </style>
 </head>
 <body>
-
+<div class="sticky-wrapper">
     <header class="hku-header-top">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="hku-brand-section">
@@ -946,12 +962,9 @@ $formatted_price = number_format($product['price'], 0, ',', '.');
             <a href="hubungikami.php" class="hku-nav-link">HUBUNGI KAMI</a>
         </div>
     </nav>
-
+</div>
     <div class="breadcrumb">
-        <a href="beranda.php">Beranda</a> &nbsp; <i class="fas fa-chevron-right" style="font-size:10px; color:#ccc;"></i> &nbsp;
-        <a href="produk.php">Produk</a> &nbsp; <i class="fas fa-chevron-right" style="font-size:10px; color:#ccc;"></i> &nbsp;
-        <a href="produk.php?category=<?php echo urlencode($product['category']); ?>"><?php echo htmlspecialchars($product['category']); ?></a> &nbsp; <i class="fas fa-chevron-right" style="font-size:10px; color:#ccc;"></i> &nbsp;
-        <span><?php echo htmlspecialchars($product['name']); ?></span>
+        
     </div>
 
     <div class="product-detail-container">

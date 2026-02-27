@@ -13,6 +13,22 @@ require_once 'config/check_login.php';
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+         /* ===== STICKY HEADER FIX ===== */
+.sticky-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+}
+
+.hku-header-top {
+    position: relative;
+    z-index: 9999;
+}
+
+.hku-main-nav {
+    position: relative;
+    z-index: 9998;
+}
         :root {
             /* Warna Tema Baru HKU */
             --primary-blue: #003893; 
@@ -627,7 +643,7 @@ require_once 'config/check_login.php';
     </style>
 </head>
 <body>
-
+<div class="sticky-wrapper">
     <header class="hku-header-top">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="hku-brand-section">
@@ -704,7 +720,7 @@ require_once 'config/check_login.php';
             <a href="hubungikami.php" class="hku-nav-link">HUBUNGI KAMI</a>
         </div>
     </nav>
-
+                    </div>
     <section class="about-hero">
         <div class="container">
             <h1>Tentang Kami</h1>
