@@ -221,7 +221,7 @@ $products = getAllProducts($conn);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Produk - Admin PT Megatek Industrial Persada</title>
+    <title>Manajemen Produk - Admin PT Hardjadinata Karya Utama</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -929,8 +929,8 @@ $products = getAllProducts($conn);
     <div class="container">
         <aside class="sidebar">
         <div class="logo">
-            <h1>Megatek</h1>
-            <h2>Industrial Persada</h2>
+            <h1>HARDJADINATA</h1>
+            <h2>KARYA UTAMA</h2>
         </div>
         <ul class="nav-menu">
             <li class="nav-item">
@@ -982,7 +982,7 @@ $products = getAllProducts($conn);
             <header class="header">
             <h1>Manajemen Produk</h1>
             <div class="user-info">
-                <span>Admin Megatek</span>
+                <span>Admin HKU</span>
                 <div class="avatar">AM</div>
             </div>
         </header>
@@ -1121,7 +1121,7 @@ $products = getAllProducts($conn);
             </section>
 
             <footer class="footer">
-                <p>&copy; 2025 PT Megatek Industrial Persada - Your Trusted Industrial Partner</p>
+                <p>&copy; 2025 PT Hardjadinata Karya - Your Trusted Industrial Partner</p>
             </footer>
         </main>
     </div>
