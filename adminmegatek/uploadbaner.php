@@ -130,12 +130,52 @@ if (isset($_GET['delete_id'])) {
 <body>
     <aside class="sidebar">
         <div class="logo">
-            <h1>Megatek</h1>
-            <h2>Industrial</h2>
+            <h1>HARDJADINATA</h1>
+            <h2>KARYA UTAMA</h2>
         </div>
         <ul class="nav-menu">
-            <li class="nav-item"><a href="index.php" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-            <li class="nav-item"><a href="uploadbanner.php" class="nav-link active"><i class="fa-solid fa-download"></i><span>Upload Banner</span></a></li>
+            <li class="nav-item">
+                <a href="index.php" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="produk.php" class="nav-link">
+                    <i class="fas fa-box"></i>
+                    <span>Produk</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="pesanan.php" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Pesanan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="pelanggan.php" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Pelanggan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="laporan.php" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Laporan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="uploadbaner.php" class="nav-link active">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Banner</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="logout.php" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
         </ul>
     </aside>
 
