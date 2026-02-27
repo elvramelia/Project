@@ -109,18 +109,18 @@ $json_orders = json_encode($final_orders);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Pesanan - Admin Megatek</title>
+    <title>Manajemen Pesanan - Admin Hardjadinata Karya Utama</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- CSS BAWAAN ANDA (DIPERTAHANKAN) --- */
         :root {
-            --primary: #004080;
-            --primary-light: #0066cc;
+            /* WARNA DISESUAIKAN DENGAN LOGO HKU SEPERTI INDEX.PHP */
+            --primary: #0021A5; 
+            --primary-light: #1A3DBF; 
             --secondary: #333333;
-            --accent: #e6b800;
+            --accent: #E30613; 
             --light: #f5f5f5;
-            --danger: #d32f2f;
+            --danger: #E30613; 
             --success: #2e7d32;
             --warning: #f57c00;
             --info: #0288d1;
@@ -135,13 +135,18 @@ $json_orders = json_encode($final_orders);
 
         /* Sidebar & Layout Styles */
         .sidebar { width: 260px; background-color: var(--primary); color: white; padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto; transition: all 0.3s; box-shadow: var(--box-shadow); z-index: 100; }
-        .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 20px; }
+        
+        /* Logo Styling Diselaraskan */
+        .logo { padding: 0 20px 20px; border-bottom: 3px solid var(--accent); margin-bottom: 20px; }
         .logo h1 { font-size: 22px; font-weight: 700; color: white; }
-        .logo h2 { font-size: 14px; font-weight: 400; color: rgba(255, 255, 255, 0.8); margin-top: 5px; }
+        .logo h2 { font-size: 14px; font-weight: 600; color:  white; margin-top: 5px; }
+        
         .nav-menu { list-style: none; padding: 0 15px; }
         .nav-item { margin-bottom: 5px; }
         .nav-link { display: flex; align-items: center; padding: 12px 15px; color: rgba(255, 255, 255, 0.9); text-decoration: none; border-radius: var(--border-radius); transition: all 0.3s; }
-        .nav-link:hover, .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        
+        /* Active nav-link style diperbarui */
+        .nav-link:hover, .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; border-left: 4px solid var(--accent); }
         .nav-link i { margin-right: 12px; font-size: 18px; width: 24px; text-align: center; }
         
         .main-content { flex: 1; margin-left: 260px; padding: 20px; transition: all 0.3s; }
@@ -149,17 +154,19 @@ $json_orders = json_encode($final_orders);
         .header h1 { color: var(--primary); font-size: 28px; }
         .user-info { display: flex; align-items: center; gap: 15px; }
         .user-info span { font-weight: 600; color: var(--secondary); }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary-light); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        
+        /* Avatar menggunakan warna aksen */
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
 
         /* Card Stats */
         .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: white; border-radius: var(--border-radius); padding: 20px; box-shadow: var(--box-shadow); border-left: 5px solid var(--primary); }
+        .card { background: white; border-radius: var(--border-radius); padding: 20px; box-shadow: var(--box-shadow); border-left: 5px solid var(--accent); }
         .card.pending { border-left-color: var(--warning); }
         .card.processing { border-left-color: var(--info); }
         .card.completed { border-left-color: var(--success); }
         .card-title { font-size: 16px; color: var(--gray); margin-bottom: 10px; }
         .card-value { font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 5px; }
-        .card i { float: right; font-size: 40px; color: rgba(0, 64, 128, 0.1); margin-top: 10px; }
+        .card i { float: right; font-size: 40px; color: rgba(0, 33, 165, 0.1); margin-top: 10px; }
 
         /* Table & Filters */
         .orders-section { background: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 25px; margin-bottom: 30px; }
@@ -170,7 +177,7 @@ $json_orders = json_encode($final_orders);
         thead { background-color: var(--primary); color: white; }
         th { padding: 16px 15px; text-align: left; font-weight: 600; font-size: 15px; }
         tbody tr { border-bottom: 1px solid var(--light-gray); transition: background-color 0.2s; }
-        tbody tr:hover { background-color: rgba(0, 64, 128, 0.03); }
+        tbody tr:hover { background-color: rgba(0, 33, 165, 0.03); }
         td { padding: 15px; color: var(--secondary); }
         
         .order-status { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-block; }
@@ -178,13 +185,13 @@ $json_orders = json_encode($final_orders);
         .status-processing { background-color: rgba(2, 136, 209, 0.15); color: var(--info); }
         .status-shipped { background-color: rgba(123, 31, 162, 0.15); color: purple; } /* New */
         .status-delivered { background-color: rgba(46, 125, 50, 0.15); color: var(--success); }
-        .status-cancelled { background-color: rgba(211, 47, 47, 0.15); color: var(--danger); }
+        .status-cancelled { background-color: rgba(227, 6, 19, 0.15); color: var(--danger); }
 
         .btn { padding: 8px 15px; border: none; border-radius: var(--border-radius); cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.3s; font-size: 14px; text-decoration: none; }
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { background-color: var(--primary-light); }
         .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); }
-        .btn-outline:hover { background-color: rgba(0, 64, 128, 0.05); }
+        .btn-outline:hover { background-color: rgba(0, 33, 165, 0.05); }
 
         /* --- STYLING KHUSUS UNTUK TIMELINE (MENIRU TAMPILAN USER) --- */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; }
@@ -309,16 +316,21 @@ $json_orders = json_encode($final_orders);
 <body>
     <aside class="sidebar">
         <div class="logo">
-            <h1>Megatek</h1>
-            <h2>Industrial Persada</h2>
+            <h1>HARDJADINATA</h1>
+            <h2>KARYA UTAMA</h2>
         </div>
         <ul class="nav-menu">
             <li class="nav-item"><a href="index.php" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
             <li class="nav-item"><a href="produk.php" class="nav-link"><i class="fas fa-box"></i><span>Produk</span></a></li>
             <li class="nav-item"><a href="pesanan.php" class="nav-link active"><i class="fas fa-shopping-cart"></i><span>Pesanan</span></a></li>
-            <li class="nav-item"><a href="pelanggan.php" class="nav-link"><i class="fas fa-users"></i><span>Pelanggan</span></a></li>
+            <li class="nav-item"><a href="pelanggan.php" class="nav-link"><i class="fas fa-users"></i><span>Users</span></a></li>
             <li class="nav-item"><a href="laporan.php" class="nav-link"><i class="fas fa-chart-bar"></i><span>Laporan</span></a></li>
-            <li class="nav-item"><a href="uploadbaner.php" class="nav-link"><i class="fa-solid fa-download"></i><span>Upload Baner</span></a></li>
+          <li class="nav-item">
+                <a href="uploadbaner.php" class="nav-link">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Banner</span>
+                </a>
+            </li>
             <li class="nav-item"><a href="logout.php" class="nav-link"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
         </ul>
     </aside>
@@ -327,7 +339,7 @@ $json_orders = json_encode($final_orders);
         <header class="header">
             <h1>Manajemen Pesanan</h1>
             <div class="user-info">
-                <span>Admin Megatek</span>
+                <span>Admin HKU</span>
                 <div class="avatar">AM</div>
             </div>
         </header>
@@ -364,7 +376,7 @@ $json_orders = json_encode($final_orders);
         </section>
         
         <footer class="footer" style="text-align: center; padding: 20px; color: #777;">
-            <p>&copy; 2025 PT Megatek Industrial Persada</p>
+            <p>&copy; 2026 Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
         </footer>
     </main>
 
@@ -528,8 +540,8 @@ $json_orders = json_encode($final_orders);
             if(status === 'cancelled') {
                 container.innerHTML = `
                     <div style="width:100%; text-align:center; padding:20px; background-color:#ffebee; border-radius:8px; border:1px solid #ef9a9a;">
-                        <i class="fas fa-times-circle" style="font-size:30px; color:#d32f2f; margin-bottom:10px;"></i>
-                        <h4 style="color:#d32f2f;">Pesanan Dibatalkan</h4>
+                        <i class="fas fa-times-circle" style="font-size:30px; color:var(--danger); margin-bottom:10px;"></i>
+                        <h4 style="color:var(--danger);">Pesanan Dibatalkan</h4>
                         <p style="color:#555;">Pesanan ini telah dibatalkan pada ${formatDate(dateUpdated)}</p>
                     </div>
                 `;

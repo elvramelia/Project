@@ -221,22 +221,23 @@ $products = getAllProducts($conn);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Produk - Admin PT Megatek Industrial Persada</title>
+    <title>Manajemen Produk - Admin Hardjadinata Karya Utama</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #004080;
-            --primary-light: #0066cc;
+            /* WARNA DISESUAIKAN DENGAN LOGO HKU SEPERTI INDEX.PHP */
+            --primary: #0021A5; 
+            --primary-light: #1A3DBF; 
             --secondary: #333333;
-            --accent: #ff9800;
+            --accent: #E30613; 
             --light: #f5f5f5;
-            --danger: #e74c3c;
-            --success: #27ae60;
-            --warning: #f39c12;
+            --danger: #E30613; 
+            --success: #2e7d32;
+            --warning: #f57c00;
             --gray: #7f8c8d;
             --light-gray: #ecf0f1;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 6px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
         }
 
@@ -244,11 +245,11 @@ $products = getAllProducts($conn);
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #f8f9fa;
+            background-color: #f9f9f9;
             color: var(--secondary);
             min-height: 100vh;
         }
@@ -261,37 +262,41 @@ $products = getAllProducts($conn);
         /* Sidebar */
         .sidebar {
             width: 260px;
-            background: linear-gradient(180deg, var(--primary) 0%, #153376 100%);
+            background-color: var(--primary);
             color: white;
+            padding: 20px 0;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             transition: all 0.3s;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--box-shadow);
         }
 
         .logo {
-            padding: 25px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            padding: 0 20px 20px;
+            /* Garis bawah logo menggunakan warna aksen merah */
+            border-bottom: 3px solid var(--accent);
+            margin-bottom: 20px;
         }
 
         .logo h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: white;
-            margin-bottom: 5px;
         }
 
         .logo h2 {
             font-size: 14px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            /* Teks KARYA UTAMA diberi warna merah agar selaras dengan logo */
+            color: white;
+            margin-top: 5px;
         }
 
         .nav-menu {
             list-style: none;
             padding: 0 15px;
+            margin-top: 15px;
         }
 
         .nav-item {
@@ -301,18 +306,18 @@ $products = getAllProducts($conn);
         .nav-link {
             display: flex;
             align-items: center;
-            padding: 14px 15px;
+            padding: 12px 15px;
             color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             border-radius: var(--border-radius);
             transition: all 0.3s;
-            font-size: 15px;
         }
 
         .nav-link:hover, .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
-            transform: translateX(5px);
+            /* Tambahan efek border kiri merah untuk menu aktif */
+            border-left: 4px solid var(--accent); 
         }
 
         .nav-link i {
@@ -361,7 +366,7 @@ $products = getAllProducts($conn);
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: var(--primary-light);
+            background-color: var(--accent);
             color: white;
             display: flex;
             align-items: center;
@@ -408,7 +413,7 @@ $products = getAllProducts($conn);
         .filter-input:focus, .filter-select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26, 60, 139, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 33, 165, 0.1);
         }
 
         .filter-actions {
@@ -440,6 +445,7 @@ $products = getAllProducts($conn);
         .btn-primary:hover {
             background-color: var(--primary-light);
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 33, 165, 0.2);
         }
 
         .btn-success {
@@ -459,7 +465,7 @@ $products = getAllProducts($conn);
         }
 
         .btn-outline:hover {
-            background-color: rgba(26, 60, 139, 0.1);
+            background-color: rgba(0, 33, 165, 0.05);
         }
 
         /* Products Section */
@@ -591,7 +597,7 @@ $products = getAllProducts($conn);
         }
 
         .status-active { background-color: rgba(39, 174, 96, 0.15); color: var(--success); }
-        .status-inactive { background-color: rgba(231, 76, 60, 0.15); color: var(--danger); }
+        .status-inactive { background-color: rgba(227, 6, 19, 0.15); color: var(--danger); }
 
         .product-actions {
             display: flex;
@@ -708,7 +714,7 @@ $products = getAllProducts($conn);
         .form-control:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26, 60, 139, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 33, 165, 0.1);
         }
 
         .form-row {
@@ -762,7 +768,7 @@ $products = getAllProducts($conn);
         }
         .file-input-label:hover {
             border-color: var(--primary);
-            background-color: #eef2ff;
+            background-color: rgba(0, 33, 165, 0.05);
         }
         .upload-icon { color: var(--primary); font-size: 20px; }
         .file-name {
@@ -929,8 +935,8 @@ $products = getAllProducts($conn);
     <div class="container">
         <aside class="sidebar">
         <div class="logo">
-            <h1>Megatek</h1>
-            <h2>Industrial Persada</h2>
+            <h1>HARDJADINATA</h1>
+            <h2>KARYA UTAMA</h2>
         </div>
         <ul class="nav-menu">
             <li class="nav-item">
@@ -955,7 +961,7 @@ $products = getAllProducts($conn);
             <li class="nav-item">
                 <a href="pelanggan.php" class="nav-link">
                     <i class="fas fa-users"></i>
-                    <span>Pelanggan</span>
+                    <span>Users</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -964,10 +970,10 @@ $products = getAllProducts($conn);
                     <span>Laporan</span>
                 </a>
             </li>
-             <li class="nav-item">
+            <li class="nav-item">
                 <a href="uploadbaner.php" class="nav-link">
-                    <i class="fa-solid fa-download" style="color: #ffffff;"></i>
-                    <span>Upload Baner</span>
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Banner</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -982,7 +988,7 @@ $products = getAllProducts($conn);
             <header class="header">
             <h1>Manajemen Produk</h1>
             <div class="user-info">
-                <span>Admin Megatek</span>
+                <span>Admin HKU</span>
                 <div class="avatar">AM</div>
             </div>
         </header>
@@ -1121,7 +1127,7 @@ $products = getAllProducts($conn);
             </section>
 
             <footer class="footer">
-                <p>&copy; 2025 PT Megatek Industrial Persada - Your Trusted Industrial Partner</p>
+                <p>&copy; 2026 Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
             </footer>
         </main>
     </div>

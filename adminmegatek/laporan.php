@@ -110,7 +110,8 @@ $query_cat = "
     GROUP BY p.category
 ";
 $result_cat = mysqli_query($conn, $query_cat);
-$colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#64748b'];
+// Disesuaikan dengan warna logo jika memungkinkan, jika tidak tetap menggunakan palet warna yang jelas untuk chart
+$colors = ['#0021A5', '#E30613', '#f59e0b', '#8b5cf6', '#10b981', '#64748b']; 
 $i = 0;
 
 if ($result_cat) {
@@ -132,7 +133,7 @@ if ($result_cat) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan - PT Megatek Industrial Persada</title>
+    <title>Laporan - Admin Hardjadinata Karya Utama</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -140,16 +141,16 @@ if ($result_cat) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
     <style>
         :root {
-            --primary: #004080;
-            --primary-light: #0066cc;
+            /* WARNA DISESUAIKAN DENGAN LOGO HKU SEPERTI INDEX.PHP */
+            --primary: #0021A5; 
+            --primary-light: #1A3DBF; 
             --secondary: #333333;
-            --accent: #e6b800;
+            --accent: #E30613; 
             --light: #f5f5f5;
-            --danger: #d32f2f;
+            --danger: #E30613; 
             --success: #2e7d32;
             --warning: #f57c00;
             --info: #0288d1;
-            --purple: #7b1fa2;
             --gray: #757575;
             --light-gray: #e0e0e0;
             --border-radius: 6px;
@@ -159,15 +160,20 @@ if ($result_cat) {
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f9f9f9; color: var(--secondary); display: flex; min-height: 100vh; }
 
-        /* Sidebar */
+        /* Sidebar & Layout Styles */
         .sidebar { width: 260px; background-color: var(--primary); color: white; padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto; transition: all 0.3s; box-shadow: var(--box-shadow); z-index: 100; }
-        .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 20px; }
+        
+        /* Logo Styling Diselaraskan */
+        .logo { padding: 0 20px 20px; border-bottom: 3px solid var(--accent); margin-bottom: 20px; }
         .logo h1 { font-size: 22px; font-weight: 700; color: white; }
-        .logo h2 { font-size: 14px; font-weight: 400; color: rgba(255, 255, 255, 0.8); margin-top: 5px; }
+        .logo h2 { font-size: 14px; font-weight: 600; color:  white; margin-top: 5px; }
+        
         .nav-menu { list-style: none; padding: 0 15px; }
         .nav-item { margin-bottom: 5px; }
         .nav-link { display: flex; align-items: center; padding: 12px 15px; color: rgba(255, 255, 255, 0.9); text-decoration: none; border-radius: var(--border-radius); transition: all 0.3s; }
-        .nav-link:hover, .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        
+        /* Active nav-link style diperbarui */
+        .nav-link:hover, .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; border-left: 4px solid var(--accent); }
         .nav-link i { margin-right: 12px; font-size: 18px; width: 24px; text-align: center; }
 
         /* Main Content */
@@ -176,7 +182,7 @@ if ($result_cat) {
         .header h1 { color: var(--primary); font-size: 28px; display: flex; align-items: center; gap: 10px; }
         .user-info { display: flex; align-items: center; gap: 15px; }
         .user-info span { font-weight: 600; color: var(--secondary); }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary-light); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
 
         /* Filter Section */
         .filter-section { background: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 25px; margin-bottom: 30px; }
@@ -185,16 +191,16 @@ if ($result_cat) {
         .filter-group { display: flex; flex-direction: column; }
         .filter-label { margin-bottom: 8px; font-weight: 600; color: var(--secondary); font-size: 15px; }
         .filter-input, .filter-select { padding: 12px 15px; border: 1px solid var(--light-gray); border-radius: var(--border-radius); font-size: 16px; transition: border 0.3s; }
-        .filter-input:focus, .filter-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 64, 128, 0.1); }
+        .filter-input:focus, .filter-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 33, 165, 0.1); }
         .filter-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 10px; }
 
         /* Stats Cards */
         .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: white; border-radius: var(--border-radius); padding: 20px; box-shadow: var(--box-shadow); border-left: 5px solid var(--primary); }
+        .card { background: white; border-radius: var(--border-radius); padding: 20px; box-shadow: var(--box-shadow); border-left: 5px solid var(--accent); }
         .card-title { font-size: 16px; color: var(--gray); margin-bottom: 10px; }
         .card-value { font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 5px; }
         .card-change { font-size: 14px; color: var(--success); }
-        .card i { float: right; font-size: 40px; color: rgba(0, 64, 128, 0.1); margin-top: 10px; }
+        .card i { float: right; font-size: 40px; color: rgba(0, 33, 165, 0.1); margin-top: 10px; }
 
         /* Charts Section */
         .charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; margin-bottom: 30px; }
@@ -213,13 +219,13 @@ if ($result_cat) {
         .section-title { font-size: 22px; color: var(--primary); font-weight: 600; }
         .btn { padding: 10px 20px; border: none; border-radius: var(--border-radius); cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; font-size: 15px; }
         .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 64, 128, 0.2); }
+        .btn-primary:hover { background-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 33, 165, 0.2); }
         .btn-success { background-color: var(--success); color: white; }
         .btn-warning { background-color: var(--warning); color: white; }
         .btn-danger { background-color: var(--danger); color: white; }
         .btn-info { background-color: var(--info); color: white; }
         .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); }
-        .btn-outline:hover { background-color: rgba(0, 64, 128, 0.05); }
+        .btn-outline:hover { background-color: rgba(0, 33, 165, 0.05); }
 
         /* Table Styles */
         .table-container { overflow-x: auto; border-radius: var(--border-radius); border: 1px solid var(--light-gray); }
@@ -227,7 +233,7 @@ if ($result_cat) {
         thead { background-color: var(--primary); color: white; }
         th { padding: 16px 15px; text-align: left; font-weight: 600; font-size: 15px; }
         tbody tr { border-bottom: 1px solid var(--light-gray); transition: background-color 0.2s; }
-        tbody tr:hover { background-color: rgba(0, 64, 128, 0.03); }
+        tbody tr:hover { background-color: rgba(0, 33, 165, 0.03); }
         td { padding: 15px; color: var(--secondary); }
         .status { padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-block; }
         .status.completed { background-color: rgba(46, 125, 50, 0.15); color: var(--success); }
@@ -267,23 +273,27 @@ if ($result_cat) {
         .modal-footer { padding: 20px 25px; background-color: #f9f9f9; display: flex; justify-content: flex-end; gap: 15px; border-top: 1px solid var(--light-gray); }
         .close-modal { background: none; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1; }
 
-
     </style>
 
 </head>
 <body>
     <aside class="sidebar">
         <div class="logo">
-            <h1>Megatek</h1>
-            <h2>Industrial Persada</h2>
+            <h1>HARDJADINATA</h1>
+            <h2>KARYA UTAMA</h2>
         </div>
         <ul class="nav-menu">
             <li class="nav-item"><a href="index.php" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
             <li class="nav-item"><a href="produk.php" class="nav-link"><i class="fas fa-box"></i><span>Produk</span></a></li>
             <li class="nav-item"><a href="pesanan.php" class="nav-link"><i class="fas fa-shopping-cart"></i><span>Pesanan</span></a></li>
-            <li class="nav-item"><a href="pelanggan.php" class="nav-link"><i class="fas fa-users"></i><span>Pelanggan</span></a></li>
+            <li class="nav-item"><a href="pelanggan.php" class="nav-link"><i class="fas fa-users"></i><span>Users</span></a></li>
             <li class="nav-item"><a href="laporan.php" class="nav-link active"><i class="fas fa-chart-bar"></i><span>Laporan</span></a></li>
-            <li class="nav-item"><a href="uploadbaner.php" class="nav-link"><i class="fa-solid fa-download"></i><span>Upload Banner</span></a></li>
+            <li class="nav-item">
+                <a href="uploadbaner.php" class="nav-link">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Banner</span>
+                </a>
+            </li>
             <li class="nav-item"><a href="logout.php" class="nav-link"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
         </ul>
     </aside>
@@ -292,7 +302,7 @@ if ($result_cat) {
         <header class="header">
             <h1><i class="fas fa-chart-bar"></i> Laporan & Analitik</h1>
             <div class="user-info">
-                <span>Admin Megatek</span>
+                <span>Admin HKU</span>
                 <div class="avatar">AM</div>
             </div>
         </header>
@@ -326,7 +336,7 @@ if ($result_cat) {
         <div class="charts-section">
             <div class="chart-container">
                 <div class="chart-header">
-                    <h3 class="chart-title">Grafik Pendapatan</h3>
+                    <h3 class="chart-title">Grafik Pendapatan (6 Bulan Terakhir)</h3>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="salesChart"></canvas>
@@ -391,7 +401,7 @@ if ($result_cat) {
         </div>
 
         <footer class="footer">
-            <p>&copy; 2025 PT Megatek Industrial Persada</p>
+            <p>&copy; 2026 Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
             <p style="margin-top: 10px; font-size: 12px;">Update: <span id="lastUpdated"><?php echo date('d F Y H:i'); ?></span></p>
         </footer>
     </main>
@@ -463,7 +473,7 @@ if ($result_cat) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
-                        <div style="width: 30px; height: 30px; border-radius: 50%; background-color: ${product.rank <= 3 ? 'var(--primary)' : '#f0f0f0'}; color: ${product.rank <= 3 ? 'white' : 'var(--secondary)'}; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                        <div style="width: 30px; height: 30px; border-radius: 50%; background-color: ${product.rank <= 3 ? 'var(--accent)' : '#f0f0f0'}; color: ${product.rank <= 3 ? 'white' : 'var(--secondary)'}; display: flex; align-items: center; justify-content: center; font-weight: 700;">
                             ${product.rank}
                         </div>
                     </td>
@@ -492,8 +502,8 @@ if ($result_cat) {
                     datasets: [{
                         label: 'Pendapatan',
                         data: revenues,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderColor: '#0021A5', // Menggunakan biru HKU
+                        backgroundColor: 'rgba(0, 33, 165, 0.1)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4

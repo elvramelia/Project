@@ -71,60 +71,100 @@ if (isset($_GET['delete_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Banner - PT Megatek Industrial Persada</title>
+    <title>Upload Banner - Admin Hardjadinata Karya Utama</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS SAMA SEPERTI SEBELUMNYA (SAYA SINGKAT AGAR RAPI) */
-        :root { --primary: #004080; --primary-light: #0066cc; --secondary: #333333; --accent: #e6b800; --light: #f5f5f5; --danger: #d32f2f; --success: #2e7d32; --warning: #f57c00; --info: #0288d1; --gray: #757575; --light-gray: #e0e0e0; --border-radius: 6px; --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+        :root {
+            /* WARNA DISESUAIKAN DENGAN LOGO HKU SEPERTI INDEX.PHP */
+            --primary: #0021A5; 
+            --primary-light: #1A3DBF; 
+            --secondary: #333333;
+            --accent: #E30613; 
+            --light: #f5f5f5;
+            --danger: #E30613; 
+            --success: #2e7d32;
+            --warning: #f57c00;
+            --info: #0288d1;
+            --gray: #757575;
+            --light-gray: #e0e0e0;
+            --border-radius: 6px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f9f9f9; color: var(--secondary); display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background-color: var(--primary); color: white; padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto; transition: all 0.3s; box-shadow: var(--box-shadow); z-index: 99; }
-        .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 20px; }
+        
+       /* Sidebar & Layout Styles */
+        .sidebar { width: 260px; background-color: var(--primary); color: white; padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto; transition: all 0.3s; box-shadow: var(--box-shadow); z-index: 100; }
+        
+        /* Logo Styling Diselaraskan */
+        .logo { padding: 0 20px 20px; border-bottom: 3px solid var(--accent); margin-bottom: 20px; }
         .logo h1 { font-size: 22px; font-weight: 700; color: white; }
-        .logo h2 { font-size: 14px; font-weight: 400; color: rgba(255, 255, 255, 0.8); margin-top: 5px; }
+        .logo h2 { font-size: 14px; font-weight: 600; color:  white; margin-top: 5px; }
+        
         .nav-menu { list-style: none; padding: 0 15px; }
         .nav-item { margin-bottom: 5px; }
         .nav-link { display: flex; align-items: center; padding: 12px 15px; color: rgba(255, 255, 255, 0.9); text-decoration: none; border-radius: var(--border-radius); transition: all 0.3s; }
-        .nav-link:hover, .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        
+        /* Active nav-link style diperbarui */
+        .nav-link:hover, .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; border-left: 4px solid var(--accent); }
         .nav-link i { margin-right: 12px; font-size: 18px; width: 24px; text-align: center; }
+        
+        /* Main Content */
         .main-content { flex: 1; margin-left: 260px; padding: 20px; transition: all 0.3s; }
         .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--light-gray); margin-bottom: 30px; }
         .header h1 { color: var(--primary); font-size: 28px; display: flex; align-items: center; gap: 10px; }
         .user-info { display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary-light); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        
+        /* Upload Section & Settings */
         .upload-section, .settings-section, .banners-section { background: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 25px; margin-bottom: 30px; }
         .section-title { font-size: 22px; color: var(--primary); font-weight: 600; margin-bottom: 20px; }
         .upload-area { border: 3px dashed var(--light-gray); border-radius: var(--border-radius); padding: 40px 20px; text-align: center; transition: all 0.3s; margin-bottom: 30px; cursor: pointer; }
-        .upload-area:hover, .upload-area.drag-over { border-color: var(--primary); background-color: rgba(0, 64, 128, 0.02); }
+        .upload-area:hover, .upload-area.drag-over { border-color: var(--primary); background-color: rgba(0, 33, 165, 0.02); }
         .file-input { display: none; }
         .upload-btn { display: inline-block; padding: 12px 30px; background-color: var(--primary); color: white; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .upload-btn:hover { background-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 33, 165, 0.2); }
+        
         .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
         .setting-group { margin-bottom: 20px; }
         .setting-label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--secondary); font-size: 15px; }
-        .setting-control, .setting-select, .setting-textarea { width: 100%; padding: 12px 15px; border: 1px solid var(--light-gray); border-radius: var(--border-radius); font-size: 16px; }
+        .setting-control, .setting-select, .setting-textarea { width: 100%; padding: 12px 15px; border: 1px solid var(--light-gray); border-radius: var(--border-radius); font-size: 16px; transition: border 0.3s;}
+        .setting-control:focus, .setting-select:focus, .setting-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 33, 165, 0.1); }
         .setting-textarea { min-height: 100px; resize: vertical; }
-        .btn { padding: 10px 20px; border: none; border-radius: var(--border-radius); cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; }
+        
+        .btn { padding: 10px 20px; border: none; border-radius: var(--border-radius); cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; transition: all 0.3s;}
         .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 33, 165, 0.2); }
         .btn-danger { background-color: var(--danger); color: white; }
+        .btn-danger:hover { background-color: #c0392b; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(227, 6, 19, 0.2); }
+        
+        /* Banners Grid */
         .banners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
         .banner-card { border: 1px solid var(--light-gray); border-radius: var(--border-radius); overflow: hidden; transition: all 0.3s; background: white;}
-        .banner-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
+        .banner-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); border-color: var(--primary); }
         .banner-image { width: 100%; height: 150px; object-fit: cover; border-bottom: 1px solid var(--light-gray); }
         .banner-info { padding: 20px; }
+        .banner-title { font-weight: 700; font-size: 18px; color: var(--secondary); margin-bottom: 5px; }
         .banner-status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
         .status-active { background-color: rgba(46, 125, 50, 0.15); color: var(--success); }
-        .status-inactive { background-color: rgba(211, 47, 47, 0.15); color: var(--danger); }
+        .status-inactive { background-color: rgba(227, 6, 19, 0.15); color: var(--danger); }
         .banner-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .action-btn { padding: 8px 15px; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 14px; color: white;}
+        .action-btn { padding: 8px 15px; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 14px; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.3s;}
         .edit-btn { background-color: var(--primary); }
+        .edit-btn:hover { background-color: var(--primary-light); }
         .delete-btn { background-color: var(--danger); }
+        .delete-btn:hover { background-color: #c0392b; }
         
         /* Tambahan untuk file info & preview */
         .file-info { display: none; align-items: center; gap: 15px; padding: 15px; background-color: #f9f9f9; border-radius: var(--border-radius); margin-top: 15px; }
         .preview-container { text-align: center; }
         .preview-image { max-width: 100%; max-height: 200px; display: none; margin: 0 auto; border-radius: 6px; }
         
-        @media (max-width: 992px) { .sidebar { width: 80px; } .main-content { margin-left: 80px; } .sidebar span, .sidebar h1, .sidebar h2 { display: none; } .nav-link { justify-content: center; } .nav-link i { margin: 0; } }
+        /* Footer */
+        .footer { text-align: center; padding: 20px; color: var(--gray); font-size: 14px; border-top: 1px solid var(--light-gray); margin-top: 20px; }
+
+        @media (max-width: 992px) { .sidebar { width: 80px; } .main-content { margin-left: 80px; } .sidebar span, .sidebar h1, .sidebar h2 { display: none; } .logo { padding: 20px 10px; text-align: center;} .nav-link { justify-content: center; } .nav-link i { margin: 0; font-size: 22px; } }
     </style>
 </head>
 <body>
@@ -155,7 +195,7 @@ if (isset($_GET['delete_id'])) {
             <li class="nav-item">
                 <a href="pelanggan.php" class="nav-link">
                     <i class="fas fa-users"></i>
-                    <span>Pelanggan</span>
+                    <span>Users</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -165,7 +205,7 @@ if (isset($_GET['delete_id'])) {
                 </a>
             </li>
             <li class="nav-item">
-                <a href="uploadbaner.php" class="nav-link active">
+                <a href="uploadbaner.php" class="nav-link">
                     <i class="fas fa-upload"></i>
                     <span>Upload Banner</span>
                 </a>
@@ -183,7 +223,7 @@ if (isset($_GET['delete_id'])) {
         <header class="header">
             <h1><i class="fa-solid fa-download"></i> Upload Banner</h1>
             <div class="user-info">
-                <span>Admin Megatek</span>
+                <span>Admin HKU</span>
                 <div class="avatar">AM</div>
             </div>
         </header>
@@ -196,10 +236,10 @@ if (isset($_GET['delete_id'])) {
                 </div>
                 
                 <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i></div>
                     <div class="upload-text">
-                        <h3>Drag & Drop file banner di sini</h3>
-                        <p>atau klik untuk memilih file</p>
+                        <h3 style="margin-bottom: 5px;">Drag & Drop file banner di sini</h3>
+                        <p style="color: var(--gray); margin-bottom: 15px;">atau klik untuk memilih file</p>
                         <label for="bannerFile" class="upload-btn">
                             <i class="fa-solid fa-folder-open"></i> Pilih File
                         </label>
@@ -207,10 +247,10 @@ if (isset($_GET['delete_id'])) {
                     </div>
                     
                     <div class="file-info" id="fileInfo">
-                        <i class="fa-solid fa-image" style="font-size: 24px;"></i>
-                        <div>
-                            <h4 id="fileName">nama_file.jpg</h4>
-                            <p id="fileSize">0 KB</p>
+                        <i class="fa-solid fa-image" style="font-size: 24px; color: var(--primary);"></i>
+                        <div style="text-align: left;">
+                            <h4 id="fileName" style="margin-bottom: 3px;">nama_file.jpg</h4>
+                            <p id="fileSize" style="color: var(--gray); font-size: 13px;">0 KB</p>
                         </div>
                     </div>
                 </div>
@@ -218,7 +258,7 @@ if (isset($_GET['delete_id'])) {
                 <div class="banner-preview">
                     <div class="preview-container">
                         <img src="" alt="Preview" class="preview-image" id="previewImage">
-                        <div id="previewPlaceholder" style="color: #999; padding: 20px;">
+                        <div id="previewPlaceholder" style="color: #999; padding: 20px; border: 1px dashed #ccc; border-radius: 6px;">
                             <p>Preview banner akan muncul di sini</p>
                         </div>
                     </div>
@@ -272,7 +312,7 @@ if (isset($_GET['delete_id'])) {
                 </div>
                 
                 <div style="text-align: right; margin-top: 20px;">
-                    <button type="button" class="btn" style="border: 1px solid #ccc; background: white;" onclick="window.location.reload()">Reset</button>
+                    <button type="button" class="btn" style="border: 1px solid #ccc; background: white; color: var(--secondary);" onclick="window.location.reload()">Reset</button>
                     <button type="submit" name="upload" class="btn btn-primary">
                         <i class="fa-solid fa-upload"></i> Upload Database
                     </button>
@@ -281,7 +321,7 @@ if (isset($_GET['delete_id'])) {
         </form>
 
         <div class="banners-section">
-            <h2 class="section-title">Banner Aktif</h2>
+            <h2 class="section-title">Daftar Banner Uploaded</h2>
             <div class="banners-grid" id="bannersGrid">
                 
                 <?php
@@ -303,12 +343,12 @@ if (isset($_GET['delete_id'])) {
                         ?>
                         
                         <div class="banner-card">
-                            <img src="<?php echo $imagePath; ?>" alt="<?php echo $row['title']; ?>" class="banner-image">
+                            <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($row['title']); ?>" class="banner-image">
                             <div class="banner-info">
                                 <div class="banner-title"><?php echo htmlspecialchars($row['title']); ?></div>
-                                <div class="banner-meta" style="font-size: 12px; color: #777; margin-bottom: 10px;">
-                                    <span><?php echo date('d M Y', strtotime($row['created_at'])); ?></span> | 
-                                    <span>Posisi: <?php echo $row['position']; ?></span>
+                                <div class="banner-meta" style="font-size: 13px; color: #777; margin-bottom: 10px;">
+                                    <span><i class="far fa-calendar-alt"></i> <?php echo date('d M Y', strtotime($row['created_at'])); ?></span> | 
+                                    <span><i class="fas fa-layer-group"></i> <?php echo htmlspecialchars($row['position']); ?></span>
                                 </div>
                                 <div class="banner-status <?php echo $statusClass; ?>"><?php echo $statusText; ?></div>
                                 <div class="banner-actions">
@@ -322,15 +362,15 @@ if (isset($_GET['delete_id'])) {
                         <?php
                     }
                 } else {
-                    echo "<p style='grid-column: 1/-1; text-align: center; color: #777;'>Belum ada banner yang diupload.</p>";
+                    echo "<p style='grid-column: 1/-1; text-align: center; color: #777; padding: 30px; border: 1px dashed #ccc; border-radius: 6px;'>Belum ada banner yang diupload.</p>";
                 }
                 ?>
 
             </div>
         </div>
 
-        <footer style="text-align: center; margin-top: 30px; color: #888; font-size: 14px;">
-            <p>&copy; 2025 PT Megatek Industrial Persada</p>
+        <footer class="footer">
+            <p>&copy; 2026 Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
         </footer>
     </main>
 

@@ -59,16 +59,17 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - PT Megatek Industrial Persada</title>
+    <title>Admin Panel - Hardjadinata Karya Utama</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
           :root {
-            --primary: #004080;
-            --primary-light: #0066cc;
+            /* WARNA DISESUAIKAN DENGAN LOGO HKU */
+            --primary: #0021A5; /* Biru pekat dari logo */
+            --primary-light: #1A3DBF; /* Biru sedikit lebih terang untuk hover */
             --secondary: #333333;
-            --accent: #e6b800;
+            --accent: #E30613; /* Merah terang dari logo roda gigi */
             --light: #f5f5f5;
-            --danger: #d32f2f;
+            --danger: #E30613; /* Disamakan dengan merah logo */
             --success: #2e7d32;
             --warning: #f57c00;
             --info: #0288d1;
@@ -107,7 +108,8 @@ try {
 
         .logo {
             padding: 0 20px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            /* Garis bawah logo menggunakan warna aksen merah */
+            border-bottom: 3px solid var(--accent);
             margin-bottom: 20px;
         }
 
@@ -119,14 +121,16 @@ try {
 
         .logo h2 {
             font-size: 14px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            /* Teks KARYA UTAMA diberi warna merah agar selaras dengan logo */
+            color: white;
             margin-top: 5px;
         }
 
         .nav-menu {
             list-style: none;
             padding: 0 15px;
+            margin-top: 15px;
         }
 
         .nav-item {
@@ -146,6 +150,8 @@ try {
         .nav-link:hover, .nav-link.active {
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
+            /* Tambahan efek border kiri merah untuk menu aktif */
+            border-left: 4px solid var(--accent); 
         }
 
         .nav-link i {
@@ -195,7 +201,8 @@ try {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: var(--primary-light);
+            /* Avatar menggunakan aksen merah */
+            background-color: var(--accent);
             color: white;
             display: flex;
             align-items: center;
@@ -216,7 +223,8 @@ try {
             border-radius: var(--border-radius);
             padding: 20px;
             box-shadow: var(--box-shadow);
-            border-left: 5px solid var(--primary);
+            /* Garis pinggir kiri diubah ke warna aksen merah */
+            border-left: 5px solid var(--accent);
         }
 
         .card-title {
@@ -240,7 +248,7 @@ try {
         .card i {
             float: right;
             font-size: 40px;
-            color: rgba(0, 64, 128, 0.1);
+            color: rgba(0, 33, 165, 0.1); /* Biru HKU transparan */
             margin-top: 10px;
         }
 
@@ -347,7 +355,7 @@ try {
         .btn-primary:hover {
             background-color: var(--primary-light);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 64, 128, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 33, 165, 0.2);
         }
 
         .btn-success {
@@ -377,7 +385,7 @@ try {
         }
 
         .btn-outline:hover {
-            background-color: rgba(0, 64, 128, 0.05);
+            background-color: rgba(0, 33, 165, 0.05);
         }
 
         /* Table Styles */
@@ -411,7 +419,7 @@ try {
         }
 
         tbody tr:hover {
-            background-color: rgba(0, 64, 128, 0.03);
+            background-color: rgba(0, 33, 165, 0.03);
         }
 
         td {
@@ -433,7 +441,7 @@ try {
         }
 
         .status.inactive {
-            background-color: rgba(211, 47, 47, 0.15);
+            background-color: rgba(227, 6, 19, 0.15); /* Merah HKU */
             color: var(--danger);
         }
 
@@ -619,7 +627,7 @@ try {
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 64, 128, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 33, 165, 0.1);
         }
 
         .form-select {
@@ -779,7 +787,6 @@ try {
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo">
             <h1>HARDJADINATA</h1>
@@ -807,7 +814,7 @@ try {
             <li class="nav-item">
                 <a href="pelanggan.php" class="nav-link">
                     <i class="fas fa-users"></i>
-                    <span>Pelanggan</span>
+                    <span>Users</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -831,9 +838,7 @@ try {
         </ul>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
-        <!-- Header -->
         <header class="header">
             <h1>Admin Dashboard</h1>
             <div class="user-info">
@@ -842,7 +847,6 @@ try {
             </div>
         </header>
 
-        <!-- Stats Cards -->
         <div class="stats-cards">
             <div class="card fade-in">
                 <div class="card-title">Total Produk</div>
@@ -870,7 +874,6 @@ try {
             </div>
         </div>
 
-        <!-- Recent Products Section -->
         <section class="recent-section">
             <div class="section-header">
                 <h2 class="section-title">Produk Terbaru</h2>
@@ -936,13 +939,11 @@ try {
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="footer">
-            <p>&copy; 2025 PT Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
+            <p>&copy; 2026 Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
         </footer>
     </main>
 
-    <!-- Modal Konfirmasi Hapus -->
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1038,9 +1039,9 @@ try {
             if (type === 'success') {
                 notification.style.backgroundColor = '#2e7d32';
             } else if (type === 'danger') {
-                notification.style.backgroundColor = '#d32f2f';
+                notification.style.backgroundColor = '#E30613'; // Disesuaikan dengan merah HKU
             } else {
-                notification.style.backgroundColor = '#1a237e';
+                notification.style.backgroundColor = '#0021A5'; // Disesuaikan dengan biru HKU
             }
             
             const closeBtn = notification.querySelector('.close-notification');
@@ -1078,7 +1079,7 @@ try {
             }
         });
 
-        // Tambah CSS untuk modal
+        // Tambah CSS untuk modal (script tambahan yang ada di akhir kode asli)
         const style = document.createElement('style');
         style.textContent = `
             .modal {
@@ -1105,7 +1106,7 @@ try {
             
             .modal-header {
                 padding: 20px;
-                background-color: #1a237e;
+                background-color: #0021A5; /* Disesuaikan dengan Biru HKU */
                 color: white;
                 display: flex;
                 justify-content: space-between;
