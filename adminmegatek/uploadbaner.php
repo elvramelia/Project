@@ -205,7 +205,7 @@ if (isset($_GET['delete_id'])) {
                 </a>
             </li>
             <li class="nav-item">
-                <a href="uploadbaner.php" class="nav-link">
+                <a href="uploadbaner.php" class="nav-link active">
                     <i class="fas fa-upload"></i>
                     <span>Upload Banner</span>
                 </a>
