@@ -109,7 +109,8 @@ $json_orders = json_encode($final_orders);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Pesanan - Admin Hardjadinata Karya Utama</title>
+
+    <title>Manajemen Pesanan - Admin HKU</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -376,7 +377,9 @@ $json_orders = json_encode($final_orders);
         </section>
         
         <footer class="footer" style="text-align: center; padding: 20px; color: #777;">
+
             <p>&copy; 2026 Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
+
         </footer>
     </main>
 
