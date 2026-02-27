@@ -926,8 +926,8 @@ $products = getAllProducts($conn);
     </style>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
+    <!-- Sidebar -->
+    <aside class="sidebar">
         <div class="logo">
             <h1>HARDJADINATA</h1>
             <h2>KARYA UTAMA</h2>
@@ -945,7 +945,6 @@ $products = getAllProducts($conn);
                     <span>Produk</span>
                 </a>
             </li>
-            
             <li class="nav-item">
                 <a href="pesanan.php" class="nav-link">
                     <i class="fas fa-shopping-cart"></i>
@@ -964,15 +963,16 @@ $products = getAllProducts($conn);
                     <span>Laporan</span>
                 </a>
             </li>
-             <li class="nav-item">
+            <li class="nav-item">
                 <a href="uploadbaner.php" class="nav-link">
-                    <i class="fa-solid fa-download" style="color: #ffffff;"></i>
-                    <span>Upload Baner</span>
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Banner</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="logout.php" class="nav-link">
-                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
                 </a>
             </li>
         </ul>
