@@ -782,8 +782,8 @@ try {
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo">
-            <h1>Megatek</h1>
-            <h2>Industrial Persada</h2>
+            <h1>HARDJADINATA</h1>
+            <h2>KARYA UTAMA</h2>
         </div>
         <ul class="nav-menu">
             <li class="nav-item">
@@ -837,7 +837,7 @@ try {
         <header class="header">
             <h1>Admin Dashboard</h1>
             <div class="user-info">
-                <span>Admin Megatek</span>
+                <span>Admin HKU</span>
                 <div class="avatar">AM</div>
             </div>
         </header>
@@ -938,7 +938,7 @@ try {
 
         <!-- Footer -->
         <footer class="footer">
-            <p>&copy; 2025 PT Megatek Industrial Persada - Your Trusted Industrial Partner</p>
+            <p>&copy; 2025 PT Hardjadinata Karya Utama - Your Trusted Industrial Partner</p>
         </footer>
     </main>
 
