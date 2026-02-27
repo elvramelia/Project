@@ -605,9 +605,9 @@ require_once 'config/check_login.php';
                     </div>
                     <div class="contact-details">
                         <h4>Alamat Kantor</h4>
-                        <p>PT. Hardjadinata Karya Utama</p>
-                        <p>Jl. Raya Industri No. 123</p>
-                        <p>Surabaya, Jawa Timur 60293</p>
+                        <p>Spazio Tower Office Building Lantai 2 Unit 201</p>
+                        <p>JL.Mayjend Jonosewono No.Kav 3</p>
+                        <p>Surabaya, Jawa Timur</p>
                         <p>Indonesia</p>
                     </div>
                 </div>
