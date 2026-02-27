@@ -15,17 +15,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($query->num_rows > 0) {
         $user = $query->fetch_assoc();
         
-        // Cek password (Gunakan password_verify jika kamu menggunakan password_hash saat register)
-        // Jika belum di-hash dan masih plain text, gunakan: if ($password == $user['password'])
+        // Cek password
         if (password_verify($password, $user['password'])) {
-           $_SESSION['role'] = $user['role'];
+            
+            // TAMBAHKAN SESSION INI AGAR SESUAI DENGAN check_login.php
+            $_SESSION['logged_in'] = true;
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['first_name'] = $user['first_name'];
+            $_SESSION['last_name'] = $user['last_name'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['role'] = $user['role'];
 
-if ($user['role'] == 'admin') {
-    header("Location: adminmegatek/index.php"); // Arahkan ke halaman admin
-} else {
-    header("Location: beranda.php"); // Arahkan ke halaman beranda pelanggan
-}
-exit();
+            // Redirect berdasarkan role
+            if ($user['role'] == 'admin') {
+                header("Location: adminmegatek/index.php"); 
+            } else {
+                header("Location: beranda.php"); 
+            }
+            exit();
+            
         } else {
             echo "<script>alert('Password salah!'); window.location.href='beranda.php';</script>";
         }

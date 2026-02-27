@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 function isLoggedIn() {
     return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 }
@@ -25,7 +24,6 @@ function getUserInfo() {
     }
     return null;
 }
-
 // Set default timezone
 date_default_timezone_set('Asia/Jakarta');
 ?>

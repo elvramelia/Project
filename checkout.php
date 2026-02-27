@@ -11,6 +11,13 @@ $user_id = $_SESSION['user_id'];
 $message = '';
 $message_type = '';
 
+// Menghitung jumlah item di keranjang untuk Header
+$cart_count = 0;
+$cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+if ($cart_count_query) {
+    $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+}
+
 // Fetch cart items
 $cart_query = "
     SELECT 
@@ -36,7 +43,7 @@ $cart_result = $stmt->get_result();
 $cart_items = $cart_result->fetch_all(MYSQLI_ASSOC);
 
 if (empty($cart_items)) {
-    header('Location: keranjang.php');
+    header('Location: cart.php');
     exit();
 }
 
@@ -81,16 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->begin_transaction();
     
     try {
-        // DEBUG: Log data before insert
-        error_log("=== ORDER DATA ===");
-        error_log("Order Number: " . $order_number);
-        error_log("User ID: " . $user_id);
-        error_log("Total Amount: " . $grand_total);
-        error_log("Shipping Address: " . $full_shipping_address);
-        error_log("Payment Method: " . $payment_method);
-        error_log("==================");
-        
-        // Insert order - PERBAIKAN DISINI
+        // Insert order
         $order_query = "INSERT INTO orders (order_number, user_id, total_amount, status, shipping_address, payment_method, bank_name, payment_status) 
                 VALUES (?, ?, ?, 'pending', ?, ?, ?, 'pending')";
 
@@ -101,24 +99,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Bind parameters: s i d s s
-       $stmt->bind_param("sidsss", 
-    $order_number, 
-    $user_id, 
-    $grand_total, 
-    $full_shipping_address, 
-    $payment_method,
-    $bank_name
-);
-
+        $stmt->bind_param("sidsss", 
+            $order_number, 
+            $user_id, 
+            $grand_total, 
+            $full_shipping_address, 
+            $payment_method,
+            $bank_name
+        );
         
         if (!$stmt->execute()) {
             throw new Exception("Execute failed: " . $stmt->error);
         }
         
         $order_id = $stmt->insert_id;
-        
-        // DEBUG: Check if order was inserted
-        error_log("Order inserted successfully. Order ID: " . $order_id);
         
         if (!$order_id) {
             throw new Exception("Failed to get order ID");
@@ -175,9 +169,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Commit transaction
         $conn->commit();
         
-        // DEBUG: Success log
-        error_log("Transaction completed successfully. Redirecting to order confirmation.");
-        
         // Redirect to order confirmation
         header("Location: order_confirmation.php?order_id=$order_id");
         exit();
@@ -185,10 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Exception $e) {
         // Rollback transaction on error
         $conn->rollback();
-        
-        // DEBUG: Error log
         error_log("Transaction failed: " . $e->getMessage());
-        
         $message = 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage();
         $message_type = 'error';
     }
@@ -199,14 +187,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Megatek Industrial Persada</title>
+    <title>Checkout - Hardjadinata Karya Utama</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-blue: #1a4b8c;
+            /* Warna Tema Baru HKU */
+            --primary-blue: #003893; 
+            --primary-red: #e30613;
             --light-gray: #f8f9fa;
             --dark-gray: #222;
         }
@@ -219,71 +209,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 0;
         }
 
-        /* Top Bar */
-        .top-bar {
-            background-color: #f0f2f5;
-            padding: 5px 0;
-            font-size: 12px;
-            border-bottom: 1px solid #e0e0e0;
+        /* ===== STICKY HEADER HKU ===== */
+        .sticky-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
         }
 
-        .top-bar-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
+        .hku-header-top {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px 0;
+            position: relative;
+            z-index: 9999;
         }
 
-        .top-bar-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        .top-bar-links a {
-            color: #666;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .top-bar-links a:hover {
-            color: var(--primary-blue);
-        }
-
-        .app-promo {
+        .hku-brand-section {
             display: flex;
             align-items: center;
-            gap: 5px;
-            color: var(--primary-blue);
-            font-weight: 500;
+            gap: 15px;
         }
 
-        /* Main Navbar */
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            padding: 10px 20px;
+        .hku-brand-section img {
+            height: 65px;
+            background: white;
+            border-radius: 40px;
+            padding: 4px;
         }
 
-        .navbar-brand img {
-            height: 40px;
+        .hku-brand-text h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hku-brand-text p {
+            font-size: 14px;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .hku-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 25px;
         }
 
         .search-bar {
-            flex-grow: 1;
-            max-width: 500px;
-            margin: 0 auto;
             position: relative;
+            width: 300px;
         }
 
         .search-bar input {
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            padding: 10px 45px 10px 20px;
+            border-radius: 4px;
+            border: none;
+            padding: 8px 40px 8px 15px;
             font-size: 14px;
             width: 100%;
-            background-color: #f8f9fa;
         }
 
         .search-bar button {
@@ -293,24 +278,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #666;
+            color: var(--primary-blue);
             cursor: pointer;
-        }
-
-        .nav-icons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
         }
 
         .nav-icon {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #666;
+            color: white !important;
             text-decoration: none;
             font-size: 12px;
-            min-width: 50px;
+            transition: color 0.3s;
         }
 
         .nav-icon i {
@@ -319,56 +298,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .nav-icon:hover {
-            color: var(--primary-blue);
-            text-decoration: none;
+            color: var(--primary-red) !important;
         }
 
-        /* Main Menu Horizontal */
-        .main-menu {
+        /* Garis Merah Pemisah */
+        .hku-divider {
+            height: 5px;
+            background-color: var(--primary-red);
+            width: 100%;
+        }
+
+        /* Menu Navigasi Putih */
+        .hku-main-nav {
             background-color: white;
-            border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 9998;
         }
 
-        .menu-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
+        .hku-nav-container {
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
         }
 
-        .menu-category {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 15px 0;
-            font-weight: 500;
-            color: var(--dark-gray);
+        .hku-nav-link {
+            padding: 15px 30px;
+            font-weight: 700;
+            color: var(--primary-blue);
             text-decoration: none;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
+            text-transform: uppercase;
+            border-bottom: 4px solid transparent;
             transition: all 0.3s;
+            font-size: 15px;
         }
 
-        .menu-category:hover {
-            color: var(--primary-blue);
-            border-bottom-color: var(--primary-blue);
+        .hku-nav-link:hover, .hku-nav-link.active {
+            color: var(--primary-red);
+            background-color: #fcfcfc;
+            border-bottom-color: var(--primary-red);
         }
 
-        .menu-category.active {
-            color: var(--primary-blue);
-            border-bottom-color: var(--primary-blue);
-        }
-
-        .menu-category i {
-            font-size: 14px;
-            margin-left: 5px;
-        }
-
-         /* User dropdown */
-      .dropdown-menu {
+        /* User dropdown */
+        .dropdown-menu {
             position: absolute;
             right: 0;
             top: 100%;
@@ -380,17 +352,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: none;
         }
 
-.dropdown-menu.show {
-    display: block;
-}
+        .dropdown-menu.show {
+            display: block;
+        }
 
+        .dropdown-item {
+            color: var(--dark-gray);
+            transition: background 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-blue);
+        }
 
-         /* Cart Badge */
+        /* Cart Badge */
         .cart-badge {
             position: absolute;
             top: -5px;
-            right: 5px;
-            background-color: #ff4444;
+            right: -5px;
+            background-color: var(--primary-red);
             color: white;
             font-size: 10px;
             min-width: 16px;
@@ -400,14 +381,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             justify-content: center;
             padding: 0 4px;
+            border: 2px solid var(--primary-blue);
         }
 
-        /* Checkout Hero Section */
+        /* ===== CHECKOUT SPECIFIC STYLES ===== */
         .checkout-hero {
             background-color: var(--primary-blue);
             color: white;
             padding: 40px 0;
             text-align: center;
+            border-bottom: 5px solid var(--primary-red);
         }
 
         .checkout-hero h1 {
@@ -423,14 +406,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             opacity: 0.9;
         }
 
-        /* Checkout Container */
         .checkout-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 40px 15px;
         }
 
-        /* Checkout Layout */
         .checkout-layout {
             display: grid;
             grid-template-columns: 1fr 400px;
@@ -478,28 +459,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: white;
         }
 
-        .step.completed .step-circle i {
-            display: block;
-        }
+        .step.completed .step-circle i { display: block; }
+        .step.completed .step-circle span { display: none; }
+        .step-circle i { display: none; }
 
-        .step.completed .step-circle span {
-            display: none;
-        }
-
-        .step-circle i {
-            display: none;
-        }
-
-        .step-label {
-            font-size: 12px;
-            color: #666;
-            font-weight: 500;
-        }
-
-        .step.active .step-label {
-            color: var(--primary-blue);
-            font-weight: 600;
-        }
+        .step-label { font-size: 12px; color: #666; font-weight: 500; }
+        .step.active .step-label { color: var(--primary-blue); font-weight: 600; }
 
         /* Checkout Sections */
         .checkout-section {
@@ -523,617 +488,272 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: var(--primary-blue);
             font-size: 1.3rem;
             margin: 0;
+            font-weight: 700;
         }
 
         /* Form Styles */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark-gray);
-        }
-
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--dark-gray); }
         .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
+            width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px;
+            font-size: 14px; transition: all 0.3s;
         }
-
         .form-control:focus {
-            border-color: var(--primary-blue);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(26, 75, 140, 0.2);
+            border-color: var(--primary-blue); outline: none; box-shadow: 0 0 0 2px rgba(0, 56, 147, 0.2);
         }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
         /* Payment Methods */
-        .payment-methods {
-            display: grid;
-            gap: 15px;
-        }
-
-        .payment-method {
-            position: relative;
-        }
-
-        .payment-method input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-        }
-
+        .payment-methods { display: grid; gap: 15px; }
+        .payment-method { position: relative; }
+        .payment-method input[type="radio"] { position: absolute; opacity: 0; }
         .payment-label {
-            display: block;
-            padding: 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
+            display: block; padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px;
+            cursor: pointer; transition: all 0.3s;
         }
-
-        .payment-label:hover {
-            border-color: #ccc;
-            background-color: #f9f9f9;
-        }
-
+        .payment-label:hover { border-color: #ccc; background-color: #f9f9f9; }
         .payment-method input[type="radio"]:checked + .payment-label {
-            border-color: var(--primary-blue);
-            background-color: #f0f7ff;
+            border-color: var(--primary-blue); background-color: #f0f7ff;
         }
 
-        .payment-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .payment-icon {
-            font-size: 24px;
-            color: var(--primary-blue);
-            min-width: 40px;
-        }
-
-        .payment-details h4 {
-            margin: 0 0 5px 0;
-            color: var(--dark-gray);
-        }
-
-        .payment-details p {
-            margin: 0;
-            color: #666;
-            font-size: 13px;
-        }
+        .payment-info { display: flex; align-items: center; gap: 15px; }
+        .payment-icon { font-size: 24px; color: var(--primary-blue); min-width: 40px; }
+        .payment-details h4 { margin: 0 0 5px 0; color: var(--dark-gray); font-weight: 600;}
+        .payment-details p { margin: 0; color: #666; font-size: 13px; }
 
         .payment-banks {
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: none;
+            padding: 15px; background-color: #f9f9f9; border-radius: 8px; margin-top: 10px; display: none;
         }
 
         .bank-option {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
+            display: flex; align-items: center; padding: 10px; border: 1px solid #e0e0e0;
+            border-radius: 6px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s;
         }
+        .bank-option:hover { background-color: white; border-color: #ccc; }
+        .bank-option input { margin-right: 10px; }
+        .bank-logo { width: 40px; height: 40px; object-fit: contain; margin-right: 15px; }
+        .bank-info h5 { margin: 0; font-size: 14px; font-weight: 600;}
+        .bank-info p { margin: 0; font-size: 12px; color: #666; }
 
-        .bank-option:hover {
-            background-color: white;
-            border-color: #ccc;
-        }
-
-        .bank-option input {
-            margin-right: 10px;
-        }
-
-        .bank-logo {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            margin-right: 15px;
-        }
-
-        .bank-info h5 {
-            margin: 0;
-            font-size: 14px;
-        }
-
-        .bank-info p {
-            margin: 0;
-            font-size: 12px;
-            color: #666;
-        }
+        .bank-option input[type="radio"]:checked ~ .bank-info h5 { color: var(--primary-blue); }
+        .bank-option input[type="radio"]:checked { accent-color: var(--primary-blue); }
+        .bank-option:has(input:checked) { border-color: var(--primary-blue); background-color: #f0f7ff; }
 
         .qris-code {
-            text-align: center;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            margin-top: 10px;
-            display: none;
+            text-align: center; padding: 20px; background-color: white; border-radius: 8px;
+            border: 1px solid #e0e0e0; margin-top: 10px; display: none;
         }
-
-        .qris-image {
-            max-width: 200px;
-            margin: 0 auto 15px;
-        }
-
-        .qris-image img {
-            width: 100%;
-            height: auto;
-        }
-
-        .qris-info {
-            font-size: 12px;
-            color: #666;
-        }
+        .qris-image { max-width: 200px; margin: 0 auto 15px; }
+        .qris-image img { width: 100%; height: auto; }
+        .qris-info { font-size: 12px; color: #666; }
 
         /* Order Summary */
         .order-summary {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            height: fit-content;
-            position: sticky;
-            top: 20px;
+            background-color: white; border-radius: 10px; padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); height: fit-content;
+            position: sticky; top: 150px;
         }
-
         .order-summary h2 {
-            color: var(--primary-blue);
-            font-size: 1.3rem;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            color: var(--primary-blue); font-size: 1.3rem; margin-bottom: 25px;
+            padding-bottom: 15px; border-bottom: 1px solid #eee; font-weight: 700;
         }
 
-        .product-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
+        .product-list { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
+        .product-item { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; }
+        .product-item:last-child { border-bottom: none; }
+        .product-img { width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0; margin-right: 15px; border: 1px solid #eee;}
+        .product-img img { width: 100%; height: 100%; object-fit: cover; }
+        .product-info { flex: 1; }
+        .product-name { font-weight: 600; margin-bottom: 5px; font-size: 14px; }
+        .product-meta { display: flex; justify-content: space-between; font-size: 13px; color: #666; }
 
-        .product-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .product-item:last-child {
-            border-bottom: none;
-        }
-
-        .product-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            overflow: hidden;
-            flex-shrink: 0;
-            margin-right: 15px;
-        }
-
-        .product-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .product-info {
-            flex: 1;
-        }
-
-        .product-name {
-            font-weight: 500;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .product-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .price-summary {
-            margin: 20px 0;
-        }
-
+        .price-summary { margin: 20px 0; }
         .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; margin-bottom: 10px;
+            padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;
         }
-
-        .summary-label {
-            color: #666;
-        }
-
-        .summary-value {
-            font-weight: 500;
-            color: var(--dark-gray);
-        }
+        .summary-label { color: #666; }
+        .summary-value { font-weight: 500; color: var(--dark-gray); }
 
         .summary-total {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-            font-size: 1.2rem;
+            display: flex; justify-content: space-between; margin-top: 20px;
+            padding-top: 20px; border-top: 2px solid #eee; font-size: 1.2rem;
         }
-
-        .total-label {
-            font-weight: 700;
-            color: var(--dark-gray);
-        }
-
-        .total-value {
-            font-weight: 700;
-            color: var(--primary-blue);
-        }
+        .total-label { font-weight: 700; color: var(--dark-gray); }
+        .total-value { font-weight: 700; color: var(--primary-red); }
 
         /* Buttons */
         .btn-back {
-            background-color: #f8f9fa;
-            color: #666;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 12px 25px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            background-color: #f8f9fa; color: #666; border: 1px solid #ddd;
+            border-radius: 8px; padding: 12px 25px; font-weight: 500; cursor: pointer;
+            transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
         }
-
-        .btn-back:hover {
-            background-color: #e9ecef;
-            color: #333;
-            text-decoration: none;
-        }
+        .btn-back:hover { background-color: var(--primary-red); color: white; border-color: var(--primary-red); }
 
         .btn-submit {
-            background-color: var(--primary-blue);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 15px 30px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 16px;
-            width: 100%;
+            background-color: var(--primary-blue); color: white; border: none;
+            border-radius: 8px; padding: 15px 30px; font-weight: 600; cursor: pointer;
+            transition: background-color 0.3s; font-size: 16px; width: 100%;
         }
+        .btn-submit:hover { background-color: #002266; }
+        .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        .btn-submit:hover {
-            background-color: #153a6e;
-        }
+        .terms-agreement { margin-top: 20px; font-size: 13px; color: #666; }
+        .terms-agreement a { color: var(--primary-blue); text-decoration: none; font-weight: 600; }
+        .terms-agreement a:hover { text-decoration: underline; color: var(--primary-red); }
 
-        .btn-submit:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .terms-agreement {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .terms-agreement a {
-            color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .terms-agreement a:hover {
-            text-decoration: underline;
-        }
-
-        /* Alert Messages */
-        .alert {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            font-size: 14px;
-            border: 1px solid transparent;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border-color: #c3e6cb;
-        }
-
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-color: #f5c6cb;
-        }
-
-        /* Footer */
+        /* ===== FOOTER HKU ===== */
         .footer {
-            background-color: #1a1a1a;
+            background-color: #001f55;
             color: white;
             padding: 60px 0 30px;
             margin-top: 60px;
+            border-top: 5px solid var(--primary-red);
         }
 
-        .footer-logo {
-            height: 40px;
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             margin-bottom: 20px;
         }
+        
+        .footer-logo-img {
+            height: 55px;
+            background-color: white;
+            border-radius: 30px;
+            padding: 3px;
+        }
 
-        .footer h5 {
+        .footer-brand-title {
             color: white;
-            font-weight: 600;
-            margin-bottom: 25px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
         }
 
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #aaa;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
+        .footer h5 { color: white; font-weight: 600; margin-bottom: 25px; font-size: 1.1rem; }
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a { color: #ccc; text-decoration: none; transition: color 0.3s; }
+        .footer-links a:hover { color: white; }
 
         .social-icons a {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
-            background: #333;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 36px;
-            margin-right: 10px;
-            transition: background 0.3s;
+            display: inline-block; width: 36px; height: 36px; background: rgba(255,255,255,0.1);
+            color: white; border-radius: 50%; text-align: center; line-height: 36px;
+            margin-right: 10px; transition: background 0.3s;
         }
-
-        .social-icons a:hover {
-            background: var(--primary-blue);
-        }
+        .social-icons a:hover { background: var(--primary-red); }
 
         .copyright {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-            color: #aaa;
-            font-size: 14px;
+            text-align: center; margin-top: 40px; padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 14px;
         }
 
         /* Responsive */
         @media (max-width: 992px) {
-            .checkout-layout {
-                grid-template-columns: 1fr;
-            }
-            
-            .order-summary {
-                position: static;
-                margin-top: 30px;
-            }
+            .hku-header-actions { display: none; }
+            .checkout-layout { grid-template-columns: 1fr; }
+            .order-summary { position: static; margin-top: 30px; }
         }
-
         @media (max-width: 768px) {
-            .top-bar {
-                display: none;
-            }
-            
-            .main-menu {
-                display: none;
-            }
-            
-            .checkout-hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .checkout-steps {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            .step {
-                flex-direction: row;
-                text-align: left;
-                gap: 15px;
-            }
-            
-            .step-circle {
-                margin-bottom: 0;
-            }
+            .form-row { grid-template-columns: 1fr; }
+            .checkout-steps { flex-direction: column; gap: 20px; }
+            .step { flex-direction: row; text-align: left; gap: 15px; }
+            .step-circle { margin-bottom: 0; }
         }
-
-        @media (max-width: 576px) {
-            .checkout-container {
-                padding: 30px 15px;
-            }
-            
-            .checkout-section,
-            .order-summary {
-                padding: 20px;
-            }
-            
-            .payment-info {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-
-        .bank-option input[type="radio"] {
-    margin-right: 10px;
-}
-
-.bank-option input[type="radio"]:checked ~ .bank-info {
-    font-weight: 600;
-}
-
-.bank-option input[type="radio"]:checked {
-    accent-color: var(--primary-blue);
-}
-
-.bank-option input[type="radio"]:checked {
-    accent-color: var(--primary-blue);
-}
-
-.bank-option input[type="radio"]:checked + .bank-logo,
-.bank-option input[type="radio"]:checked ~ .bank-info {
-    color: var(--primary-blue);
-}
-.bank-option:has(input:checked) {
-    border-color: var(--primary-blue);
-    background-color: #f0f7ff;
-}
-
     </style>
 </head>
 <body>
-<!-- Main Navbar -->
-     <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="index.php">
-            <img src="uploads/LOGO.png" alt="Megatek Logo">
-        </a>
 
-        <div class="search-bar">
-            <input type="text" class="form-control" placeholder="Cari produk, kategori, atau brand">
-            <button type="button">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-
-        <div class="nav-icons">
-          <a href="cart.php" class="nav-icon">
-
-                <div style="position: relative;">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge" id="cartCount">
-                        <?php 
-                        if (isLoggedIn()) {
-                            $user_id = $_SESSION['user_id'];
-                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
-                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
-                            echo $cart_count;
-                        } else {
-                            echo '0';
-                        }
-                        ?>
-                    </span>
+    <div class="sticky-wrapper">
+        <header class="hku-header-top">
+            <div class="container d-flex justify-content-between align-items-center">
+                <div class="hku-brand-section">
+                    <img src="uploads/logoHKU.png" alt="HKU Logo">
+                    <div class="hku-brand-text">
+                        <h1>HARDJADINATA KARYA UTAMA</h1>
+                        <p>Your Trusted Partner in Industrial Spareparts</p>
+                    </div>
                 </div>
-                <span>Keranjang</span>
-            </a>
-            
-            <div id="userSection">
-                <?php if (isLoggedIn()): ?>
-                    <!-- User sudah login -->
-                    <div class="user-dropdown">
-                        <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
-                            <i class="fas fa-user"></i>
-                            <span>
-                                <?php 
-                                if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
-                                    echo htmlspecialchars($_SESSION['first_name']);
-                                } else {
-                                    echo 'Akun';
-                                }
-                                ?>
-                            </span>
-                        </a>
-                        <div class="dropdown-menu" id="userDropdownMenu">
-                            <span class="dropdown-item-text">
-                                <small>Logged in as:</small><br>
-                                <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
-                            </span>
-                            <div class="dropdown-divider"></div>
-                           
-                            <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="logout.php">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <!-- User belum login -->
-                    <a href="javascript:void(0);" class="nav-icon" id="userLogin">
-                        <i class="fas fa-user"></i>
-                        <span>Masuk/Daftar</span>
-                    </a>
-                <?php endif; ?>
-            </div>
-                    </div>
-    </nav>
 
-    <!-- Main Menu Horizontal -->
-    <div class="main-menu">
-        <div class="menu-container">
-            <a href="beranda.php" class="menu-category <?php echo basename($_SERVER['PHP_SELF']) == 'produk.php' ? 'active' : ''; ?>">
-                <span>Beranda</span>
-            </a>
-            <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
-            <a href="produk.php" class="menu-category">Produk</a>
-            <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
-        </div>
+                <div class="hku-header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Cari produk, kategori, atau brand">
+                        <button type="button"><i class="fas fa-search"></i></button>
+                    </div>
+
+                    <a href="cart.php" class="nav-icon">
+                        <div style="position: relative;">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-badge" id="cartCount"><?php echo $cart_count; ?></span>
+                        </div>
+                        <span class="mt-1">Keranjang</span>
+                    </a>
+                    
+                    <div id="userSection">
+                        <?php if (isLoggedIn()): ?>
+                            <div class="user-dropdown" style="position: relative;">
+                                <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
+                                    <i class="fas fa-user"></i>
+                                    <span class="mt-1">
+                                        <?php 
+                                        if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
+                                            echo htmlspecialchars($_SESSION['first_name']);
+                                        } else {
+                                            echo 'Akun';
+                                        }
+                                        ?>
+                                    </span>
+                                </a>
+                                <div class="dropdown-menu" id="userDropdownMenu">
+                                    <span class="dropdown-item-text" style="display: block; padding: 10px 15px;">
+                                        <small>Logged in as:</small><br>
+                                        <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
+                                    </span>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="orders.php" style="display: block; padding: 10px 15px; text-decoration: none;"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item text-danger" href="logout.php" style="display: block; padding: 10px 15px; text-decoration: none;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="hku-divider"></div>
+
+        <nav class="hku-main-nav">
+            <div class="container hku-nav-container">
+                <a href="beranda.php" class="hku-nav-link">BERANDA</a>
+                <a href="tentangkami.php" class="hku-nav-link">TENTANG KAMI</a>
+                <a href="produk.php" class="hku-nav-link">PRODUK</a>
+                <a href="hubungikami.php" class="hku-nav-link">HUBUNGI KAMI</a>
+            </div>
+        </nav>
     </div>
 
-    <!-- Checkout Hero Section -->
     <section class="checkout-hero">
         <div class="container">
             <h1>Checkout Pembayaran</h1>
-            <p>Selesaikan pembayaran untuk menyelesaikan pesanan Anda</p>
+            <p>Selesaikan pembayaran untuk memproses pesanan Anda</p>
         </div>
     </section>
 
-    <!-- Checkout Container -->
     <div class="checkout-container">
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $message_type === 'error' ? 'danger' : 'success'; ?>">
-                <i class="fas fa-<?php echo $message_type === 'error' ? 'exclamation-circle' : 'check-circle'; ?>"></i>
+            <div class="alert alert-<?php echo $message_type === 'error' ? 'danger' : 'success'; ?> alert-dismissible fade show">
+                <i class="fas fa-<?php echo $message_type === 'error' ? 'exclamation-circle' : 'check-circle'; ?> me-2"></i>
                 <?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
         
-        <!-- Checkout Steps -->
         <div class="checkout-steps">
             <div class="step completed">
                 <div class="step-circle">
@@ -1164,10 +784,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="checkout-layout">
-            <!-- Left Column: Checkout Form -->
             <div class="checkout-form">
                 <form method="POST" id="checkoutForm">
-                    <!-- Shipping Address Section -->
                     <div class="checkout-section">
                         <div class="section-header">
                             <h2><i class="fas fa-map-marker-alt me-2"></i>Alamat Pengiriman</h2>
@@ -1212,14 +830,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <!-- Payment Method Section -->
                     <div class="checkout-section">
                         <div class="section-header">
                             <h2><i class="fas fa-credit-card me-2"></i>Metode Pembayaran</h2>
                         </div>
                         
                         <div class="payment-methods">
-                            <!-- Bank Transfer -->
                             <div class="payment-method">
                                 <input type="radio" id="payment_bank" name="payment_method" value="bank_transfer" required>
                                 <label for="payment_bank" class="payment-label">
@@ -1234,36 +850,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                 </label>
                                 <div class="payment-banks" id="bankOptions">
-                                   <label class="bank-option" for="bank_bca">
-                                    <input type="radio" id="bank_bca" name="bank_option" value="bca">
-                                    <img src="uploads/logobankbca.jpeg" class="bank-logo">
-                                    <div class="bank-info">
-                                        <h5>Bank Central Asia (BCA)</h5>
-                                        <p>1234567890 - Megatek Industrial Persada</p>
-                                    </div>
-                                </label>
+                                    <label class="bank-option" for="bank_bca">
+                                        <input type="radio" id="bank_bca" name="bank_option" value="bca">
+                                        <img src="uploads/logobankbca.jpeg" class="bank-logo">
+                                        <div class="bank-info">
+                                            <h5>Bank Central Asia (BCA)</h5>
+                                            <p>1234567890 - Hardjadinata Karya Utama</p>
+                                        </div>
+                                    </label>
 
-                                     <label class="bank-option" for="bank_mandiri">
-                                       <input type="radio" id="bank_mandiri" name="bank_option" value="mandiri">
-                                       <img src="uploads/logobankmandiri.png" class="bank-logo">
-                                           <div class="bank-info">
-                                                  <h5>Bank Mandiri</h5>
-                                                   <p>0987654321 - Megatek Industrial Persada</p>
-                                           </div>
-                                     </label>
+                                    <label class="bank-option" for="bank_mandiri">
+                                        <input type="radio" id="bank_mandiri" name="bank_option" value="mandiri">
+                                        <img src="uploads/logobankmandiri.png" class="bank-logo">
+                                        <div class="bank-info">
+                                            <h5>Bank Mandiri</h5>
+                                            <p>0987654321 - Hardjadinata Karya Utama</p>
+                                        </div>
+                                    </label>
 
-                                     <label class="bank-option" for="bank_bri">
-                                     <input type="radio" id="bank_bri" name="bank_option" value="bri">
-                                      <img src="uploads/logobankbri.png" class="bank-logo">
-                                            <div class="bank-info">
-                                                <h5>Bank Rakyat Indonesia (BRI)</h5>
-                                              <p>1122334455 - Megatek Industrial Persada</p>
-                                            </div>
-                                     </label>
+                                    <label class="bank-option" for="bank_bri">
+                                        <input type="radio" id="bank_bri" name="bank_option" value="bri">
+                                        <img src="uploads/logobankbri.png" class="bank-logo">
+                                        <div class="bank-info">
+                                            <h5>Bank Rakyat Indonesia (BRI)</h5>
+                                            <p>1122334455 - Hardjadinata Karya Utama</p>
+                                        </div>
+                                    </label>
                                 </div>
                             </div>
 
-                            <!-- QRIS -->
                             <div class="payment-method">
                                 <input type="radio" id="payment_qris" name="payment_method" value="qris" required>
                                 <label for="payment_qris" class="payment-label">
@@ -1279,13 +894,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </label>
                                 <div class="qris-code" id="qrisCode">
                                     <div class="qris-image">
-                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MEGATEK-ORDER-<?php echo time(); ?>" alt="QR Code">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=HKU-ORDER-<?php echo time(); ?>" alt="QR Code">
                                     </div>
                                     <p class="qris-info">Scan QR Code di atas untuk membayar</p>
                                 </div>
                             </div>
 
-                            <!-- COD -->
                             <div class="payment-method">
                                 <input type="radio" id="payment_cod" name="payment_method" value="cod" required>
                                 <label for="payment_cod" class="payment-label">
@@ -1302,25 +916,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
                         
-                        <div class="form-group">
+                        <div class="form-group mt-4">
                             <label for="notes">Catatan Pesanan (Opsional)</label>
                             <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Catatan tambahan untuk pesanan Anda..."></textarea>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
                     <div style="display: flex; justify-content: space-between; margin-top: 30px;">
-                        <a href="keranjang.php" class="btn-back">
-                            <i class="fas fa-arrow-left"></i>Kembali ke Keranjang
+                        <a href="cart.php" class="btn-back">
+                            <i class="fas fa-arrow-left"></i>Kembali
                         </a>
-                        <button type="submit" class="btn-submit" id="submitOrder">
+                        <button type="submit" class="btn-submit" id="submitOrder" style="width: auto;">
                             <i class="fas fa-lock me-2"></i>Buat Pesanan & Bayar
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Right Column: Order Summary -->
             <div class="order-summary">
                 <h2>Ringkasan Pesanan</h2>
                 
@@ -1334,7 +946,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="product-name"><?php echo htmlspecialchars($item['name']); ?></div>
                                 <div class="product-meta">
                                     <span><?php echo $item['quantity']; ?> x Rp <?php echo number_format($item['price'], 0, ',', '.'); ?></span>
-                                    <span>Rp <?php echo number_format($item['price'] * $item['quantity'], 0, ',', '.'); ?></span>
+                                    <span style="color: var(--primary-blue); font-weight: 600;">Rp <?php echo number_format($item['price'] * $item['quantity'], 0, ',', '.'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -1362,56 +974,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 
                 <div class="terms-agreement">
-                    <p>Dengan mengeklik "Buat Pesanan & Bayar", Anda menyetujui <a href="#">Syarat & Ketentuan</a> dan <a href="#">Kebijakan Privasi</a> Megatek Industrial Persada.</p>
+                    <p>Dengan mengeklik "Buat Pesanan & Bayar", Anda menyetujui <a href="#">Syarat & Ketentuan</a> dan <a href="#">Kebijakan Privasi</a> Hardjadinata Karya Utama.</p>
                 </div>
             </div>
         </div>
     </div>
 
-     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
-                    
-                    <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
-                    <div class="social-icons">
+                    <div class="footer-brand">
+                        <img src="uploads/logoHKU.png" alt="HKU Logo" class="footer-logo-img">
+                        <span class="footer-brand-title">Hardjadinata<br>Karya Utama</span>
+                    </div>
+                    <p>PT. Hardjadinata Karya Utama - Your trusted partner for industrial spareparts solutions.</p>
+                    <div class="social-icons mt-3">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Products</h5>
+                    <h5>Produk Kami</h5>
                     <ul class="footer-links">
                         <li><a href="produk.php?category=FBR Burner">Burner Series</a></li>
                         <li><a href="produk.php?category=Boiler">Boiler Series</a></li>
                         <li><a href="produk.php?category=Valve & Instrumentation">Valve & Instrumentation</a></li>
                         <li><a href="produk.php?category=Sparepart">Spare Parts</a></li>
-                        <li><a href="produk.php">All Products</a></li>
+                        <li><a href="produk.php">Semua Produk</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Information</h5>
+                    <h5>Informasi</h5>
                     <ul class="footer-links">
-                        <li><a href="aboutus.php">About Us</a></li>
-                        <li><a href="contact.php">Contact Us</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Terms of Use</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="aboutus.php">Tentang Kami</a></li>
+                        <li><a href="contact.php">Hubungi Kami</a></li>
+                        <li><a href="#">Syarat & Ketentuan</a></li>
+                        <li><a href="#">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Contact Info</h5>
+                    <h5>Kontak Info</h5>
                     <p><i class="fas fa-map-marker-alt me-2"></i> Surabaya, Indonesia</p>
                     <p><i class="fas fa-phone me-2"></i> +62 31 1234 5678</p>
-                    <p><i class="fas fa-envelope me-2"></i> info@megatek.co.id</p>
+                    <p><i class="fas fa-envelope me-2"></i> info@hku.co.id</p>
                 </div>
             </div>
             <div class="copyright">
-                © Copyright 2023 PT. Megatek Industrial Persada. All rights reserved.
+                © Copyright 2026 PT. Hardjadinata Karya Utama. All rights reserved.
             </div>
         </div>
     </footer>
@@ -1419,25 +1030,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-
-         // Dropdown menu functionality for logged in user
+        // Dropdown menu functionality for logged in user
         const userDropdown = document.getElementById('userDropdown');
-const userDropdownMenu = document.getElementById('userDropdownMenu');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
 
-if (userDropdown) {
-    userDropdown.addEventListener('click', function(e) {
-        e.stopPropagation();
-        userDropdownMenu.classList.toggle('show');
-    });
+        if (userDropdown) {
+            userDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdownMenu.classList.toggle('show');
+            });
 
-    document.addEventListener('click', function() {
-        userDropdownMenu.classList.remove('show');
-    });
+            document.addEventListener('click', function() {
+                userDropdownMenu.classList.remove('show');
+            });
 
-    userDropdownMenu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-}
+            userDropdownMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
 
         // Payment method selection
         const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
@@ -1509,17 +1119,10 @@ if (userDropdown) {
 
         // Auto-fill address if user data exists
         document.addEventListener('DOMContentLoaded', function() {
-            // If user has address data, auto-fill shipping fields
-            const userAddress = "<?php echo $user_data['address'] ?? ''; ?>";
+            const userAddress = "<?php echo addslashes($user_data['address'] ?? ''); ?>";
             if (userAddress) {
                 document.getElementById('shipping_address').value = userAddress;
             }
-            
-            // Initialize tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
         });
 
         // Character counter for notes
@@ -1534,22 +1137,15 @@ if (userDropdown) {
             }
         });
 
-        // Smooth scroll to sections
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId !== '#') {
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 100,
-                            behavior: 'smooth'
-                        });
-                    }
-                }
-            });
-        });
+        // Search logic
+        const searchInput = document.querySelector('.search-bar input');
+        const searchButton = document.querySelector('.search-bar button');
+        const executeSearch = () => {
+            const term = searchInput.value.trim();
+            if (term !== '') window.location.href = 'produk.php?search=' + encodeURIComponent(term);
+        };
+        if(searchButton) searchButton.addEventListener('click', executeSearch);
+        if(searchInput) searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeSearch(); });
     </script>
 </body>
 </html>

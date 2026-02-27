@@ -11,6 +11,13 @@ $user_id = $_SESSION['user_id'];
 $message = '';
 $message_type = '';
 
+// Menghitung jumlah item di keranjang untuk Header
+$cart_count = 0;
+$cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
+if ($cart_count_query) {
+    $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
+}
+
 // Handle order cancellation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order'])) {
     $order_id = intval($_POST['order_id']);
@@ -125,14 +132,16 @@ if ($filter !== 'all') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pesanan Saya - Megatek Industrial Persada</title>
+    <title>Pesanan Saya - Hardjadinata Karya Utama</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-blue: #1a4b8c;
+            /* Warna Tema Baru HKU */
+            --primary-blue: #003893; 
+            --primary-red: #e30613;
             --light-gray: #f8f9fa;
             --dark-gray: #222;
         }
@@ -145,117 +154,66 @@ if ($filter !== 'all') {
             padding: 0;
         }
 
-        /* Cart Badge */
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: 5px;
-            background-color: #ff4444;
-            color: white;
-            font-size: 10px;
-            min-width: 16px;
-            height: 16px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 4px;
+        /* ===== STICKY HEADER HKU ===== */
+        .sticky-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
         }
 
-        /* Cart Hero Section */
-        .cart-hero {
+        .hku-header-top {
             background-color: var(--primary-blue);
             color: white;
-            padding: 40px 0;
-            text-align: center;
+            padding: 15px 0;
+            position: relative;
+            z-index: 9999;
         }
 
-        .cart-hero h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .cart-hero p {
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto;
-            opacity: 0.9;
-        }
-
-        /* Cart Container */
-        .cart-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 15px;
-        }
-
-
-        /* Reuse all common styles from cart.php */
-        .top-bar {
-            background-color: #f0f2f5;
-            padding: 5px 0;
-            font-size: 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .top-bar-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        .top-bar-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        .top-bar-links a {
-            color: #666;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .top-bar-links a:hover {
-            color: var(--primary-blue);
-        }
-
-        .app-promo {
+        .hku-brand-section {
             display: flex;
             align-items: center;
-            gap: 5px;
-            color: var(--primary-blue);
-            font-weight: 500;
+            gap: 15px;
         }
 
-        /* Main Navbar */
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            padding: 10px 20px;
+        .hku-brand-section img {
+            height: 65px;
+            background: white;
+            border-radius: 40px;
+            padding: 4px;
         }
 
-        .navbar-brand img {
-            height: 40px;
+        .hku-brand-text h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hku-brand-text p {
+            font-size: 14px;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .hku-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 25px;
         }
 
         .search-bar {
-            flex-grow: 1;
-            max-width: 500px;
-            margin: 0 auto;
             position: relative;
+            width: 300px;
         }
 
         .search-bar input {
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            padding: 10px 45px 10px 20px;
+            border-radius: 4px;
+            border: none;
+            padding: 8px 40px 8px 15px;
             font-size: 14px;
             width: 100%;
-            background-color: #f8f9fa;
         }
 
         .search-bar button {
@@ -265,24 +223,18 @@ if ($filter !== 'all') {
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #666;
+            color: var(--primary-blue);
             cursor: pointer;
-        }
-
-        .nav-icons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
         }
 
         .nav-icon {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #666;
+            color: white !important;
             text-decoration: none;
             font-size: 12px;
-            min-width: 50px;
+            transition: color 0.3s;
         }
 
         .nav-icon i {
@@ -291,777 +243,49 @@ if ($filter !== 'all') {
         }
 
         .nav-icon:hover {
-            color: var(--primary-blue);
-            text-decoration: none;
+            color: var(--primary-red) !important;
         }
 
-        /* Main Menu Horizontal */
-        .main-menu {
-            background-color: white;
-            border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .menu-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .menu-category {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 15px 0;
-            font-weight: 500;
-            color: var(--dark-gray);
-            text-decoration: none;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .menu-category:hover {
-            color: var(--primary-blue);
-            border-bottom-color: var(--primary-blue);
-        }
-
-        .menu-category.active {
-            color: var(--primary-blue);
-            border-bottom-color: var(--primary-blue);
-        }
-
-        .menu-category i {
-            font-size: 14px;
-            margin-left: 5px;
-        }
-
-        /* Orders Hero Section */
-        .orders-hero {
-            background-color: var(--primary-blue);
-            color: white;
-            padding: 40px 0;
-            text-align: center;
-        }
-
-        .orders-hero h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .orders-hero p {
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto;
-            opacity: 0.9;
-        }
-
-        /* Orders Container */
-        .orders-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 15px;
-        }
-
-        /* Messages */
-        .alert {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            font-size: 14px;
-            border: 1px solid transparent;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border-color: #c3e6cb;
-        }
-
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-color: #f5c6cb;
-        }
-
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border-color: #bee5eb;
-        }
-
-        /* Order Tabs */
-        .order-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .order-tab {
-            padding: 10px 20px;
-            background-color: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            text-decoration: none;
-            color: #666;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .order-tab:hover {
-            background-color: #f8f9fa;
-            color: var(--primary-blue);
-            border-color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .order-tab.active {
-            background-color: var(--primary-blue);
-            color: white;
-            border-color: var(--primary-blue);
-        }
-
-        .tab-badge {
-            background-color: #e9ecef;
-            color: #495057;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-        }
-
-        .order-tab.active .tab-badge {
-            background-color: rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-
-        /* Orders Section */
-        .orders-section {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .section-header h2 {
-            color: var(--primary-blue);
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .search-orders {
-            position: relative;
-            max-width: 300px;
-        }
-
-        .search-orders input {
+        /* Garis Merah Pemisah */
+        .hku-divider {
+            height: 5px;
+            background-color: var(--primary-red);
             width: 100%;
-            padding: 10px 15px 10px 40px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
         }
 
-        .search-orders i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #666;
+        /* Menu Navigasi Putih */
+        .hku-main-nav {
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 9998;
         }
 
-        /* Empty Orders */
-        .empty-orders {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .empty-orders i {
-            font-size: 4rem;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-
-        .empty-orders h3 {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .empty-orders p {
-            color: #999;
-            margin-bottom: 30px;
-        }
-
-        .btn-shopping {
-            background-color: var(--primary-blue);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-block;
-            transition: background-color 0.3s;
-        }
-
-        .btn-shopping:hover {
-            background-color: #153a6e;
-            color: white;
-            text-decoration: none;
-        }
-
-        /* Order List */
-        .order-list {
+        .hku-nav-container {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .order-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: box-shadow 0.3s;
-        }
-
-        .order-card:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        .order-header {
-            background-color: #f8f9fa;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
         }
 
-        .order-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .order-number {
-            font-weight: 600;
-            color: var(--dark-gray);
-            font-size: 16px;
-        }
-
-        .order-date {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .order-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+        .hku-nav-link {
+            padding: 15px 30px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-decoration: none;
             text-transform: uppercase;
-        }
-
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-processing {
-            background-color: #cce5ff;
-            color: #004085;
-        }
-
-        .status-shipped {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-delivered {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-cancelled {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .payment-method {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .order-body {
-            padding: 20px;
-        }
-
-        .order-items {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .order-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-        }
-
-        .item-image {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .item-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .item-details {
-            flex: 1;
-        }
-
-        .item-name {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .item-quantity {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .item-price {
-            font-weight: 600;
-            color: var(--primary-blue);
-        }
-
-        .order-footer {
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .order-total {
-            font-weight: 700;
-            color: var(--dark-gray);
-            font-size: 18px;
-        }
-
-        .order-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-action {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+            border-bottom: 4px solid transparent;
             transition: all 0.3s;
+            font-size: 15px;
         }
 
-        .btn-view {
-            background-color: var(--primary-blue);
-            color: white;
-            border: 1px solid var(--primary-blue);
+        .hku-nav-link:hover, .hku-nav-link.active {
+            color: var(--primary-red);
+            background-color: #fcfcfc;
+            border-bottom-color: var(--primary-red);
         }
 
-        .btn-view:hover {
-            background-color: #153a6e;
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-cancel {
-            background-color: white;
-            color: #dc3545;
-            border: 1px solid #dc3545;
-        }
-
-        .btn-cancel:hover {
-            background-color: #dc3545;
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-invoice {
-            background-color: white;
-            color: #28a745;
-            border: 1px solid #28a745;
-        }
-
-        .btn-invoice:hover {
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-track {
-            background-color: white;
-            color: #ffc107;
-            border: 1px solid #ffc107;
-        }
-
-        .btn-track:hover {
-            background-color: #ffc107;
-            color: white;
-            text-decoration: none;
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-            gap: 5px;
-        }
-
-        .page-link {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            color: #666;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .page-link:hover {
-            background-color: #f8f9fa;
-            color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .page-link.active {
-            background-color: var(--primary-blue);
-            color: white;
-            border-color: var(--primary-blue);
-        }
-
-        /* Status Timeline */
-        .status-timeline {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-        }
-
-        .timeline-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--dark-gray);
-        }
-
-        .timeline-steps {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-        }
-
-        .timeline-steps:before {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: #ddd;
-            z-index: 1;
-        }
-
-        .timeline-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            flex: 1;
-        }
-
-        .step-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: #ddd;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
-        }
-
-        .timeline-step.active .step-icon {
-            background-color: var(--primary-blue);
-        }
-
-        .timeline-step.completed .step-icon {
-            background-color: #28a745;
-        }
-
-        .step-label {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-        }
-
-        .timeline-step.active .step-label {
-            color: var(--primary-blue);
-            font-weight: 500;
-        }
-
-        .step-date {
-            font-size: 11px;
-            color: #999;
-            margin-top: 3px;
-        }
-
-        /* Footer */
-        .footer {
-            background-color: #1a1a1a;
-            color: white;
-            padding: 60px 0 30px;
-            margin-top: 60px;
-        }
-
-        .footer-logo {
-            height: 40px;
-            margin-bottom: 20px;
-        }
-
-        .footer h5 {
-            color: white;
-            font-weight: 600;
-            margin-bottom: 25px;
-            font-size: 1.1rem;
-        }
-
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #aaa;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        .social-icons a {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
-            background: #333;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 36px;
-            margin-right: 10px;
-            transition: background 0.3s;
-        }
-
-        .social-icons a:hover {
-            background: var(--primary-blue);
-        }
-
-        .copyright {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-            color: #aaa;
-            font-size: 14px;
-        }
-
-        /* Modal for order details */
-        .order-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #666;
-            cursor: pointer;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .top-bar {
-                display: none;
-            }
-            
-            .main-menu {
-                display: none;
-            }
-            
-            .search-bar {
-                max-width: 200px;
-            }
-            
-            .nav-icon span {
-                display: none;
-            }
-            
-            .orders-hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .orders-container {
-                padding: 30px 15px;
-            }
-            
-            .orders-section {
-                padding: 20px;
-            }
-            
-            .order-header, .order-footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .order-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-            
-            .btn-action {
-                flex: 1;
-                justify-content: center;
-            }
-            
-            .timeline-steps {
-                flex-wrap: wrap;
-                gap: 20px;
-            }
-            
-            .timeline-step {
-                flex: none;
-                width: calc(50% - 10px);
-            }
-        }
-
-        @media (max-width: 576px) {
-            .nav-icons {
-                gap: 10px;
-            }
-            
-            .search-bar {
-                max-width: 150px;
-            }
-            
-            .navbar-brand img {
-                height: 30px;
-            }
-            
-            .order-tabs {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-                justify-content: flex-start;
-                padding-bottom: 10px;
-            }
-            
-            .order-tab {
-                white-space: nowrap;
-            }
-            
-            .order-item {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .item-image {
-                width: 80px;
-                height: 80px;
-            }
-        }
-
-         /* User dropdown */
-      .dropdown-menu {
+        /* User dropdown */
+        .dropdown-menu {
             position: absolute;
             right: 0;
             top: 100%;
@@ -1073,123 +297,323 @@ if ($filter !== 'all') {
             display: none;
         }
 
-.dropdown-menu.show {
-    display: block;
-}
+        .dropdown-menu.show { display: block; }
+        .dropdown-item { color: var(--dark-gray); transition: background 0.3s; }
+        .dropdown-item:hover { background-color: #f8f9fa; color: var(--primary-blue); }
 
+        /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--primary-red);
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid var(--primary-blue);
+        }
 
+        /* ===== ORDERS SPECIFIC STYLES ===== */
+        .orders-hero {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-bottom: 5px solid var(--primary-red);
+        }
 
+        .orders-hero h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; }
+        .orders-hero p { font-size: 1.1rem; max-width: 700px; margin: 0 auto; opacity: 0.9; }
+
+        .orders-container { max-width: 1200px; margin: 0 auto; padding: 40px 15px; }
+
+        /* Order Tabs */
+        .order-tabs {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px;
+            padding-bottom: 20px; border-bottom: 1px solid #eee;
+        }
+
+        .order-tab {
+            padding: 10px 20px; background-color: white; border: 1px solid #e0e0e0;
+            border-radius: 8px; text-decoration: none; color: #666; font-weight: 500;
+            transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+
+        .order-tab:hover {
+            background-color: #f8f9fa; color: var(--primary-blue);
+            border-color: var(--primary-blue); text-decoration: none;
+        }
+
+        .order-tab.active {
+            background-color: var(--primary-blue); color: white; border-color: var(--primary-blue);
+        }
+
+        .tab-badge {
+            background-color: #e9ecef; color: #495057; padding: 2px 8px;
+            border-radius: 10px; font-size: 12px; font-weight: bold;
+        }
+        .order-tab.active .tab-badge { background-color: rgba(255, 255, 255, 0.3); color: white; }
+
+        /* Orders Section */
+        .orders-section {
+            background-color: white; border-radius: 10px; padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee;
+        }
+
+        .section-header h2 { color: var(--primary-blue); font-size: 1.5rem; margin: 0; font-weight: 700; }
+
+        .search-orders { position: relative; max-width: 300px; }
+        .search-orders input {
+            width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px; transition: border-color 0.3s;
+        }
+        .search-orders input:focus { border-color: var(--primary-blue); outline: none; }
+        .search-orders i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; }
+
+        /* Empty Orders */
+        .empty-orders { text-align: center; padding: 60px 20px; }
+        .empty-orders i { font-size: 4rem; color: #ddd; margin-bottom: 20px; }
+        .empty-orders h3 { color: var(--primary-blue); margin-bottom: 15px; font-weight: 700;}
+        .empty-orders p { color: #999; margin-bottom: 30px; }
+
+        .btn-shopping {
+            background-color: var(--primary-blue); color: white; padding: 12px 30px;
+            border-radius: 5px; text-decoration: none; font-weight: 500;
+            display: inline-block; transition: background-color 0.3s;
+        }
+        .btn-shopping:hover { background-color: #002266; color: white; text-decoration: none; }
+
+        /* Order List */
+        .order-list { display: flex; flex-direction: column; gap: 20px; }
+        .order-card {
+            border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; transition: box-shadow 0.3s;
+        }
+        .order-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-color: var(--primary-blue); }
+
+        .order-header {
+            background-color: #f8f9fa; padding: 20px; display: flex;
+            justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+
+        .order-info { display: flex; flex-direction: column; gap: 5px; }
+        .order-number { font-weight: 700; color: var(--primary-blue); font-size: 16px; }
+        .order-date { color: #666; font-size: 14px; }
+
+        .order-status { display: flex; align-items: center; gap: 10px; }
+        .status-badge {
+            padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase;
+        }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-processing { background-color: #cce5ff; color: #004085; }
+        .status-shipped { background-color: #d1ecf1; color: #0c5460; }
+        .status-delivered { background-color: #d4edda; color: #155724; }
+        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+        .payment-method { display: flex; align-items: center; gap: 5px; color: #666; font-size: 14px; }
+
+        .order-body { padding: 20px; }
+        .order-items { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+
+        .order-item {
+            display: flex; align-items: center; gap: 15px; padding: 15px;
+            background-color: #f9f9f9; border-radius: 8px; border: 1px solid #eee;
+        }
+        .item-image { width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0; border: 1px solid #eee; background: white;}
+        .item-image img { width: 100%; height: 100%; object-fit: contain; }
+        .item-details { flex: 1; }
+        .item-name { font-weight: 600; margin-bottom: 5px; color: var(--dark-gray);}
+        .item-quantity { color: #666; font-size: 14px; }
+        .item-price { font-weight: 700; color: var(--primary-blue); }
+
+        .order-footer {
+            padding: 20px; background-color: #f8f9fa; border-top: 1px solid #e0e0e0;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .order-total { font-weight: 700; color: var(--primary-red); font-size: 18px; }
+
+        .order-actions { display: flex; gap: 10px; }
+        .btn-action {
+            padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.3s;
+        }
+        .btn-view { background-color: var(--primary-blue); color: white; border: 1px solid var(--primary-blue); }
+        .btn-view:hover { background-color: #002266; color: white; text-decoration: none; }
+        .btn-cancel { background-color: white; color: var(--primary-red); border: 1px solid var(--primary-red); }
+        .btn-cancel:hover { background-color: var(--primary-red); color: white; text-decoration: none; }
+        .btn-track { background-color: white; color: #ffc107; border: 1px solid #ffc107; }
+        .btn-track:hover { background-color: #ffc107; color: white; text-decoration: none; }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; margin-top: 30px; gap: 5px; }
+        .page-link {
+            padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;
+            color: #666; text-decoration: none; transition: all 0.3s;
+        }
+        .page-link:hover { background-color: #f8f9fa; color: var(--primary-blue); text-decoration: none; }
+        .page-link.active { background-color: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+
+        /* Status Timeline */
+        .status-timeline { margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+        .timeline-title { font-weight: 600; margin-bottom: 15px; color: var(--primary-blue); }
+        .timeline-steps { display: flex; justify-content: space-between; position: relative; }
+        .timeline-steps:before {
+            content: ''; position: absolute; top: 15px; left: 0; right: 0; height: 2px; background-color: #ddd; z-index: 1;
+        }
+        .timeline-step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; flex: 1; }
+        .step-icon {
+            width: 30px; height: 30px; border-radius: 50%; background-color: #ddd; color: white;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+        }
+        .timeline-step.active .step-icon { background-color: var(--primary-blue); }
+        .timeline-step.completed .step-icon { background-color: #28a745; }
+        .step-label { font-size: 12px; color: #666; text-align: center; }
+        .timeline-step.active .step-label { color: var(--primary-blue); font-weight: 600; }
+        .step-date { font-size: 11px; color: #999; margin-top: 3px; }
+
+        /* ===== FOOTER HKU ===== */
+        .footer {
+            background-color: #001f55; color: white; padding: 60px 0 30px; margin-top: 60px;
+            border-top: 5px solid var(--primary-red);
+        }
+        .footer-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .footer-logo-img { height: 55px; background-color: white; border-radius: 30px; padding: 3px; }
+        .footer-brand-title { color: white; font-size: 1.2rem; font-weight: 700; margin: 0; line-height: 1.2; }
+        .footer h5 { color: white; font-weight: 600; margin-bottom: 25px; font-size: 1.1rem; }
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a { color: #ccc; text-decoration: none; transition: color 0.3s; }
+        .footer-links a:hover { color: white; }
+        .social-icons a {
+            display: inline-block; width: 36px; height: 36px; background: rgba(255,255,255,0.1);
+            color: white; border-radius: 50%; text-align: center; line-height: 36px;
+            margin-right: 10px; transition: background 0.3s;
+        }
+        .social-icons a:hover { background: var(--primary-red); }
+        .copyright {
+            text-align: center; margin-top: 40px; padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) { .hku-header-actions { display: none; } }
+        @media (max-width: 768px) {
+            .orders-hero h1 { font-size: 1.8rem; }
+            .orders-container { padding: 30px 15px; }
+            .orders-section { padding: 20px; }
+            .order-header, .order-footer { flex-direction: column; align-items: flex-start; }
+            .order-actions { width: 100%; justify-content: flex-start; flex-wrap:wrap;}
+            .btn-action { flex: 1; justify-content: center; }
+            .timeline-steps { flex-wrap: wrap; gap: 20px; }
+            .timeline-steps:before { display: none; }
+            .timeline-step { flex: none; width: calc(50% - 10px); }
+        }
+        @media (max-width: 576px) {
+            .order-tabs { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; padding-bottom: 10px; }
+            .order-tab { white-space: nowrap; }
+            .order-item { flex-direction: column; text-align: center; }
+            .item-image { width: 80px; height: 80px; }
+        }
     </style>
 </head>
 <body>
-   
-    <!-- Main Navbar -->
-     <nav class="navbar d-flex align-items-center">
-        <a class="navbar-brand mx-2" href="index.php">
-            <img src="uploads/LOGO.png" alt="Megatek Logo">
-        </a>
 
-        <div class="search-bar">
-            <input type="text" class="form-control" placeholder="Cari produk, kategori, atau brand">
-            <button type="button">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-
-        <div class="nav-icons">
-           <a href="cart.php" class="nav-icon">
-
-                <div style="position: relative;">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge" id="cartCount">
-                        <?php 
-                        if (isLoggedIn()) {
-                            $user_id = $_SESSION['user_id'];
-                            $cart_count_query = $conn->query("SELECT SUM(quantity) as total FROM cart WHERE user_id = $user_id");
-                            $cart_count = $cart_count_query->fetch_assoc()['total'] ?? 0;
-                            echo $cart_count;
-                        } else {
-                            echo '0';
-                        }
-                        ?>
-                    </span>
+    <div class="sticky-wrapper">
+        <header class="hku-header-top">
+            <div class="container d-flex justify-content-between align-items-center">
+                <div class="hku-brand-section">
+                    <img src="uploads/logoHKU.png" alt="HKU Logo">
+                    <div class="hku-brand-text">
+                        <h1>HARDJADINATA KARYA UTAMA</h1>
+                        <p>Your Trusted Partner in Industrial Spareparts</p>
+                    </div>
                 </div>
-                <span>Keranjang</span>
-            </a>
-            
-            <div id="userSection">
-                <?php if (isLoggedIn()): ?>
-                    <!-- User sudah login -->
-                    <div class="user-dropdown">
-                        <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
-                            <i class="fas fa-user"></i>
-                            <span>
-                                <?php 
-                                if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
-                                    echo htmlspecialchars($_SESSION['first_name']);
-                                } else {
-                                    echo 'Akun';
-                                }
-                                ?>
-                            </span>
-                        </a>
-                        <div class="dropdown-menu" id="userDropdownMenu">
-                            <span class="dropdown-item-text">
-                                <small>Logged in as:</small><br>
-                                <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
-                            </span>
-                            <div class="dropdown-divider"></div>
-                           
-                            <a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
-                
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="logout.php">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <!-- User belum login -->
-                    <a href="javascript:void(0);" class="nav-icon" id="userLogin">
-                        <i class="fas fa-user"></i>
-                        <span>Masuk/Daftar</span>
-                    </a>
-                <?php endif; ?>
-            </div>
-                    </div>
-    </nav>
 
-     <!-- Main Menu Horizontal -->
-    <div class="main-menu">
-        <div class="menu-container">
-            <a href="beranda.php" class="menu-category <?php echo basename($_SERVER['PHP_SELF']) == 'produk.php' ? 'active' : ''; ?>">
-                <span>Beranda</span>
-            </a>
-            <a href="tentangkami.php" class="menu-category">Tentang Kami</a>
-            <a href="produk.php" class="menu-category">Produk</a>
-            <a href="hubungikami.php" class="menu-category">Hubungi Kami</a>
-           
-        </div>
+                <div class="hku-header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Cari produk, kategori, atau brand">
+                        <button type="button"><i class="fas fa-search"></i></button>
+                    </div>
+
+                    <a href="cart.php" class="nav-icon">
+                        <div style="position: relative;">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-badge" id="cartCount"><?php echo $cart_count; ?></span>
+                        </div>
+                        <span class="mt-1">Keranjang</span>
+                    </a>
+                    
+                    <div id="userSection">
+                        <?php if (isLoggedIn()): ?>
+                            <div class="user-dropdown" style="position: relative;">
+                                <a href="javascript:void(0);" class="nav-icon" id="userDropdown">
+                                    <i class="fas fa-user"></i>
+                                    <span class="mt-1">
+                                        <?php 
+                                        if (isset($_SESSION['first_name']) && !empty($_SESSION['first_name'])) {
+                                            echo htmlspecialchars($_SESSION['first_name']);
+                                        } else {
+                                            echo 'Akun';
+                                        }
+                                        ?>
+                                    </span>
+                                </a>
+                                <div class="dropdown-menu" id="userDropdownMenu">
+                                    <span class="dropdown-item-text" style="display: block; padding: 10px 15px;">
+                                        <small>Logged in as:</small><br>
+                                        <strong><?php echo htmlspecialchars($_SESSION['user_email']); ?></strong>
+                                    </span>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="orders.php" style="display: block; padding: 10px 15px; text-decoration: none;"><i class="fas fa-shopping-bag me-2"></i>My Orders</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item text-danger" href="logout.php" style="display: block; padding: 10px 15px; text-decoration: none;">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="hku-divider"></div>
+
+        <nav class="hku-main-nav">
+            <div class="container hku-nav-container">
+                <a href="beranda.php" class="hku-nav-link">BERANDA</a>
+                <a href="tentangkami.php" class="hku-nav-link">TENTANG KAMI</a>
+                <a href="produk.php" class="hku-nav-link">PRODUK</a>
+                <a href="hubungikami.php" class="hku-nav-link">HUBUNGI KAMI</a>
+            </div>
+        </nav>
     </div>
 
-    <!-- Orders Hero Section -->
     <section class="orders-hero">
         <div class="container">
             <h1>Pesanan Saya</h1>
-            <p>Kelola dan lacak pesanan Anda di Megatek Industrial Persada</p>
+            <p>Kelola dan lacak pesanan Anda di Hardjadinata Karya Utama</p>
         </div>
     </section>
 
-    <!-- Orders Container -->
     <div class="orders-container">
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'danger'; ?>">
-                <i class="fas fa-<?php echo $message_type === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
+            <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show">
+                <i class="fas fa-<?php echo $message_type === 'success' ? 'check-circle' : 'exclamation-circle'; ?> me-2"></i>
                 <?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
 
-        <!-- Order Tabs -->
         <div class="order-tabs">
             <a href="?filter=all" class="order-tab <?php echo $filter === 'all' ? 'active' : ''; ?>">
                 <i class="fas fa-shopping-bag"></i> Semua
@@ -1227,17 +651,15 @@ if ($filter !== 'all') {
             </div>
 
             <?php if (empty($filtered_orders)): ?>
-                <!-- Empty Orders -->
                 <div class="empty-orders">
-                    <i class="fas fa-shopping-bag"></i>
+                    <i class="fas fa-box-open"></i>
                     <h3>Tidak ada pesanan</h3>
                     <p>Anda belum memiliki pesanan dengan status ini</p>
                     <a href="produk.php" class="btn-shopping">
-                        <i class="fas fa-shopping-bag me-2"></i>Mulai Belanja
+                        <i class="fas fa-shopping-cart me-2"></i>Mulai Belanja
                     </a>
                 </div>
             <?php else: ?>
-                <!-- Order List -->
                 <div class="order-list">
                     <?php foreach ($filtered_orders as $order): ?>
                         <?php 
@@ -1317,12 +739,13 @@ if ($filter !== 'all') {
                                     
                                     <?php if ($order['item_count'] > 3): ?>
                                         <div class="text-center">
-                                            <small class="text-muted">+ <?php echo $order['item_count'] - 3; ?> produk lainnya</small>
+                                            <small class="text-muted" style="font-weight: 600; color: var(--primary-blue) !important;">
+                                                <i class="fas fa-plus"></i> <?php echo $order['item_count'] - 3; ?> produk lainnya
+                                            </small>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                                 
-                                <!-- Status Timeline -->
                                 <div class="status-timeline">
                                     <div class="timeline-title">Status Pesanan</div>
                                     <div class="timeline-steps">
@@ -1379,8 +802,6 @@ if ($filter !== 'all') {
                                 </div>
                                 
                                 <div class="order-actions">
-                                
-                                    
                                     <?php if ($order['status'] === 'pending' || $order['status'] === 'processing'): ?>
                                         <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')">
                                             <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
@@ -1390,11 +811,9 @@ if ($filter !== 'all') {
                                         </form>
                                     <?php endif; ?>
                                     
-                            
-                                    
                                     <?php if ($order['status'] === 'shipped'): ?>
                                         <a href="track_order.php?id=<?php echo $order['id']; ?>" class="btn-action btn-track">
-                                            <i class="fas fa-truck"></i> Lacak
+                                            <i class="fas fa-truck"></i> Lacak Pengiriman
                                         </a>
                                     <?php endif; ?>
                                 </div>
@@ -1402,61 +821,53 @@ if ($filter !== 'all') {
                         </div>
                     <?php endforeach; ?>
                 </div>
-                
-                <!-- Pagination -->
-                <div class="pagination">
-                    <a href="#" class="page-link active">1</a>
-                    <a href="#" class="page-link">2</a>
-                    <a href="#" class="page-link">3</a>
-                    <a href="#" class="page-link">Next</a>
-                </div>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <img src="uploads/LOGO.png" alt="Megatek Logo" class="footer-logo">
-                    <p>PT. Megatek Industrial Persada - Your trusted partner for industrial solutions since 2010.</p>
-                    <div class="social-icons">
+                    <div class="footer-brand">
+                        <img src="uploads/logoHKU.png" alt="HKU Logo" class="footer-logo-img">
+                        <span class="footer-brand-title">Hardjadinata<br>Karya Utama</span>
+                    </div>
+                    <p>PT. Hardjadinata Karya Utama - Your trusted partner for industrial spareparts solutions.</p>
+                    <div class="social-icons mt-3">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Products</h5>
+                    <h5>Produk Kami</h5>
                     <ul class="footer-links">
                         <li><a href="produk.php?category=FBR Burner">Burner Series</a></li>
                         <li><a href="produk.php?category=Boiler">Boiler Series</a></li>
                         <li><a href="produk.php?category=Valve & Instrumentation">Valve & Instrumentation</a></li>
                         <li><a href="produk.php?category=Sparepart">Spare Parts</a></li>
-                        <li><a href="produk.php">All Products</a></li>
+                        <li><a href="produk.php">Semua Produk</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Information</h5>
+                    <h5>Informasi</h5>
                     <ul class="footer-links">
-                        <li><a href="aboutus.php">About Us</a></li>
-                        <li><a href="contact.php">Contact Us</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Terms of Use</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="aboutus.php">Tentang Kami</a></li>
+                        <li><a href="contact.php">Hubungi Kami</a></li>
+                        <li><a href="#">Syarat & Ketentuan</a></li>
+                        <li><a href="#">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Contact Info</h5>
+                    <h5>Kontak Info</h5>
                     <p><i class="fas fa-map-marker-alt me-2"></i> Surabaya, Indonesia</p>
                     <p><i class="fas fa-phone me-2"></i> +62 31 1234 5678</p>
-                    <p><i class="fas fa-envelope me-2"></i> info@megatek.co.id</p>
+                    <p><i class="fas fa-envelope me-2"></i> info@hku.co.id</p>
                 </div>
             </div>
             <div class="copyright">
-                © Copyright 2023 PT. Megatek Industrial Persada. All rights reserved.
+                © Copyright 2026 PT. Hardjadinata Karya Utama. All rights reserved.
             </div>
         </div>
     </footer>
@@ -1464,99 +875,24 @@ if ($filter !== 'all') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-
+        // Dropdown menu functionality
         const userDropdown = document.getElementById('userDropdown');
-const userDropdownMenu = document.getElementById('userDropdownMenu');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
 
-if (userDropdown) {
-    userDropdown.addEventListener('click', function(e) {
-        e.stopPropagation();
-        userDropdownMenu.classList.toggle('show');
-    });
-
-    document.addEventListener('click', function() {
-        userDropdownMenu.classList.remove('show');
-    });
-
-    userDropdownMenu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-}
-
-        
-        // Search functionality
-        const searchInput = document.getElementById('searchOrders');
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const orderCards = document.querySelectorAll('.order-card');
-            
-            orderCards.forEach(card => {
-                const orderNumber = card.querySelector('.order-number').textContent.toLowerCase();
-                const productNames = Array.from(card.querySelectorAll('.item-name')).map(el => el.textContent.toLowerCase());
-                const matches = orderNumber.includes(searchTerm) || productNames.some(name => name.includes(searchTerm));
-                card.style.display = matches ? 'block' : 'none';
+        if (userDropdown) {
+            userDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdownMenu.classList.toggle('show');
             });
-        });
-
-        // Filter orders by tab
-        const orderTabs = document.querySelectorAll('.order-tab');
-        orderTabs.forEach(tab => {
-            tab.addEventListener('click', function(e) {
-                e.preventDefault();
-                const filter = this.getAttribute('href').split('=')[1];
-                window.location.href = 'orders.php?filter=' + filter;
+            document.addEventListener('click', function() {
+                userDropdownMenu.classList.remove('show');
             });
-        });
-
-        // Update cart count
-        function updateCartCount() {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'get_cart_count.php', true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            const cartBadge = document.querySelector('.cart-badge');
-                            if (cartBadge) {
-                                cartBadge.textContent = response.count;
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Error updating cart count:', e);
-                    }
-                }
-            };
-            xhr.send();
+            userDropdownMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCartCount();
-            
-            // Highlight active tab in menu
-            const menuLinks = document.querySelectorAll('.menu-category');
-            menuLinks.forEach(link => {
-                if (link.getAttribute('href') === 'orders.php' || link.textContent.includes('Pesanan')) {
-                    link.classList.add('active');
-                }
-            });
-            
-            // Auto-update cart count every 30 seconds
-            setInterval(updateCartCount, 30000);
-        });
-
-        // Cancel order confirmation
-        const cancelForms = document.querySelectorAll('form[onsubmit]');
-        cancelForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
-                    e.preventDefault();
-                }
-            });
-        });
-
-        // Search bar functionality (from cart.php)
+        // Global Header Search functionality
         const mainSearchInput = document.querySelector('.search-bar input');
         const mainSearchButton = document.querySelector('.search-bar button');
         
@@ -1579,6 +915,32 @@ if (userDropdown) {
                 }
             });
         }
+
+        // Local Orders Search functionality
+        const orderSearchInput = document.getElementById('searchOrders');
+        if (orderSearchInput) {
+            orderSearchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const orderCards = document.querySelectorAll('.order-card');
+                
+                orderCards.forEach(card => {
+                    const orderNumber = card.querySelector('.order-number').textContent.toLowerCase();
+                    const productNames = Array.from(card.querySelectorAll('.item-name')).map(el => el.textContent.toLowerCase());
+                    const matches = orderNumber.includes(searchTerm) || productNames.some(name => name.includes(searchTerm));
+                    card.style.display = matches ? 'block' : 'none';
+                });
+            });
+        }
+
+        // Filter orders by tab
+        const orderTabs = document.querySelectorAll('.order-tab');
+        orderTabs.forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filter = this.getAttribute('href').split('=')[1];
+                window.location.href = 'orders.php?filter=' + filter;
+            });
+        });
     </script>
 </body>
 </html>

@@ -714,7 +714,7 @@ try {
             
             <h5 class="mb-4 text-center">SIGN IN</h5>
             
-            <form id="loginForm" method="POST">
+            <form id="loginForm" method="POST" action="proses_login.php">
                 <div class="mb-3">
                     <label class="form-label fw-bold">Email address</label>
                     <input type="email" class="form-control" id="email" name="email" required>
@@ -739,7 +739,7 @@ try {
                 <p class="text-muted">Surabaya</p>
             </div>
             <h5 class="mb-4 text-center">CREATE ACCOUNT</h5>
-            <form id="registerForm" method="POST">
+           <form id="registerForm" method="POST" action="proses_register.php">
                 <div class="d-flex gap-3 mb-3">
                     <div class="w-50">
                         <label class="form-label fw-bold">First Name</label>
@@ -823,6 +823,18 @@ try {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+
+    if (status === 'success_reg') {
+        Swal.fire('Berhasil!', 'Akun Anda telah dibuat. Silakan login.', 'success');
+    } else if (status === 'email_taken') {
+        Swal.fire('Gagal', 'Email sudah terdaftar.', 'error');
+    } else if (status === 'password_mismatch') {
+        Swal.fire('Gagal', 'Konfirmasi password tidak cocok.', 'warning');
+    } else if (status === 'error') {
+        Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
+    }
         // Modal & Auth Logic
         const userLogin = document.getElementById('userLogin');
         const loginModal = document.getElementById('loginModal');
